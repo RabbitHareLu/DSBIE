@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -70,22 +71,30 @@ public class DsbieJFrame extends JFrame {
             jMenuBar.add(helpMenu);
 
             JMenu newMenu = new JMenu("新建");
+            newMenu.setIcon(ImageLoadUtil.getInstance().getNewIcon());
             JMenuItem exitMenu = new JMenuItem("退出");
+            exitMenu.setIcon(ImageLoadUtil.getInstance().getExitIcon());
             fileMenu.add(newMenu);
             fileMenu.add(exitMenu);
 
             JMenu fontMenu = new JMenu("字体");
+            fontMenu.setIcon(ImageLoadUtil.getInstance().getFontIcon());
             JMenu fontNameMenu = new JMenu("字体名称");
+            fontNameMenu.setIcon(ImageLoadUtil.getInstance().getFontNameIcon());
             JMenu fontSizeMenu = new JMenu("字体大小");
+            fontSizeMenu.setIcon(ImageLoadUtil.getInstance().getFontSizeIcon());
             JMenu fontStyleMenu = new JMenu("字体样式");
+            fontStyleMenu.setIcon(ImageLoadUtil.getInstance().getFontStyleIcon());
             settingsMenu.add(fontMenu);
             fontMenu.add(fontNameMenu);
             fontMenu.add(fontSizeMenu);
             fontMenu.add(fontStyleMenu);
 
             JMenuItem newFolder = new JMenuItem("新建文件夹");
+            newFolder.setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
             JMenu newJDBCConnection = new JMenu("新建JDBC连接");
             JMenuItem about = new JMenuItem("关于");
+            about.setIcon(ImageLoadUtil.getInstance().getAboutIcon());
             newMenu.add(newFolder);
             newMenu.add(newJDBCConnection);
             helpMenu.add(about);
@@ -100,7 +109,17 @@ public class DsbieJFrame extends JFrame {
     }
 
     private void initFontMenu() {
+        ButtonGroup fontSizeGroup = new ButtonGroup();
+        /*for (int i = 10; i <= 30; i++) {
+            JCheckBoxMenuItem jCheckBoxMenuItem = new JCheckBoxMenuItem(i + "");
+            if (Objects.equals(fontSize, i)) {
+                jCheckBoxMenuItem.setSelected(true);
+            }
 
+            jCheckBoxMenuItem.addActionListener(new UpdateFontSizeAction());
+            fontSizeGroup.add(jCheckBoxMenuItem);
+            fontSizeMenu.add(jCheckBoxMenuItem);
+        }*/
     }
 
     private void setAboutAction(JMenuItem about) {

@@ -40,8 +40,8 @@ public class FontUtil {
 //        Properties properties = KToolsContext.getInstance().getProperties();
 //        String fontName = String.valueOf(properties.get("font.name"));
 //        int fontSize = Integer.parseInt(String.valueOf(properties.get("font.size")));
-//        String fontStyle = String.valueOf(properties.get("font.style"));
-//        UIManager.put("defaultFont", new Font(fontName, FontUtil.getFontStyle(fontStyle), fontSize));
+//        String fontStyle.svg = String.valueOf(properties.get("font.style"));
+//        UIManager.put("defaultFont", new Font(fontName, FontUtil.getFontStyle(fontStyle.svg), fontSize));
     }
 
 

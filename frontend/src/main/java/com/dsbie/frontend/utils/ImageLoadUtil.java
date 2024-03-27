@@ -14,10 +14,27 @@ import javax.swing.*;
 public class ImageLoadUtil {
 
     private static final ImageLoadUtil INSTANCE = new ImageLoadUtil();
+
     private ImageIcon logoIcon = null;
+    private ImageIcon aboutIcon = null;
+    private ImageIcon newFolderIcon = null;
+    private ImageIcon newIcon = null;
+    private ImageIcon fontIcon = null;
+    private ImageIcon fontNameIcon = null;
+    private ImageIcon fontSizeIcon = null;
+    private ImageIcon fontStyleIcon = null;
+    private ImageIcon exitIcon = null;
 
     private ImageLoadUtil() {
         logoIcon = buildIcon("images/logo.svg");
+        aboutIcon = buildIcon("images/about.svg");
+        newFolderIcon = buildIcon("images/newFolder.svg");
+        newIcon = buildIcon("images/new.svg");
+        fontIcon = buildIcon("images/font.svg");
+        fontNameIcon = buildIcon("images/fontName.svg");
+        fontSizeIcon = buildIcon("images/fontSize.svg");
+        fontStyleIcon = buildIcon("images/fontStyle.svg");
+        exitIcon = buildIcon("images/exit.svg");
     }
 
     public static ImageLoadUtil getInstance() {
