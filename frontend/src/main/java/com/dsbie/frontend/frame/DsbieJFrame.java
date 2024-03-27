@@ -10,7 +10,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.time.Year;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -93,6 +92,7 @@ public class DsbieJFrame extends JFrame {
             JMenuItem newFolder = new JMenuItem("新建文件夹");
             newFolder.setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
             JMenu newJDBCConnection = new JMenu("新建JDBC连接");
+            newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
             JMenuItem about = new JMenuItem("关于");
             about.setIcon(ImageLoadUtil.getInstance().getAboutIcon());
             newMenu.add(newFolder);
