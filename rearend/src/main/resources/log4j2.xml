@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="5">
+    <!--变量配置-->
+    <Properties>
+        <!-- 日志文件默认输出格式,不带行号输出(行号显示会影响日志输出性能); %C:大写,类名; %M:方法名; %m:错误信息; %n:换行 -->
+        <property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} [%-5level] [%t] - %m%n</property>
+
+        <!-- 控制台默认输出格式, "%-5level":日志级别, "%l":输出完整的错误位置,是小写的L,因为有行号显示,所以影响日志输出的性能 -->
+        <property name="CONSOLE_LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} [%-5level] [%t] %l - %m%n</property>
+
+        <!-- 定义日志存储的路径 -->
+        <property name="LOG_HOME" value="./dsbie_logs"/>
+        <property name="LOG_FILE_NAME" value="dsbie"/>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${CONSOLE_LOG_PATTERN}"/>
+        </Console>
+
+        <RollingFile name="RollingFile" fileName="${LOG_HOME}/${LOG_FILE_NAME}_latest.log"
+                     filePattern="${LOG_HOME}/${LOG_FILE_NAME}_%d{yyyy-MM-dd}_%i.log">
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <!--interval属性用来指定多久滚动一次，默认是1-->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="20MB"/>
+            </Policies>
+            <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <RollingFile name="RollingFileZip" fileName="${LOG_HOME}/${LOG_FILE_NAME}_latest.log"
+                     filePattern="${LOG_HOME}/${LOG_FILE_NAME}_%d{yyyy-MM-dd}_%i.log.zip">
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <!--interval属性用来指定多久滚动一次，默认是1-->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="20MB"/>
+            </Policies>
+            <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+<!--            <AppenderRef ref="RollingFile"/>-->
+            <AppenderRef ref="RollingFileZip"/>
+        </Root>
+    </Loggers>
+</Configuration>
