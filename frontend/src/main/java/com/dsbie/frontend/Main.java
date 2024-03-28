@@ -14,7 +14,7 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             FlatIntelliJLaf.setup();
             UIManager.put("Button.arc", 50);  // 设置按钮的弧度
-            UIManager.put("Component.focusWidth", 1);  // 设置组件的焦点边框宽度
+            UIManager.put("Component.focusWidth", 0);  // 设置组件的焦点边框宽度
             UIManager.put("TextComponent.arc", 10);
             FontUtil.initUIFont();
             dsbieJFrame = new DsbieJFrame();

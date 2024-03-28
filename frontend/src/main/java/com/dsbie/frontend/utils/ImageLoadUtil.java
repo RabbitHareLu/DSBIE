@@ -25,6 +25,7 @@ public class ImageLoadUtil {
     private ImageIcon fontStyleIcon = null;
     private ImageIcon exitIcon = null;
     private ImageIcon newJdbcIcon = null;
+    private ImageIcon folderCloseIcon = null;
 
     private ImageLoadUtil() {
         logoIcon = buildIcon("images/logo.svg");
@@ -37,6 +38,7 @@ public class ImageLoadUtil {
         fontStyleIcon = buildIcon("images/fontStyle.svg");
         exitIcon = buildIcon("images/exit.svg");
         newJdbcIcon = buildIcon("images/newJdbc.svg");
+        folderCloseIcon = buildIcon("images/folderClose.svg");
     }
 
     public static ImageLoadUtil getInstance() {

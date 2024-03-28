@@ -2,6 +2,7 @@ package com.dsbie.frontend.component;
 
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
+import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
 import com.dsbie.rearend.api.SystemApi;
 import com.dsbie.rearend.common.utils.CollectionUtil;
@@ -45,7 +46,7 @@ public class LeftTree {
         defaultTreeModel = new DefaultTreeModel(root);
 
         jTree = new JTree(defaultTreeModel);
-        jTree.setShowsRootHandles(false);
+        jTree.setShowsRootHandles(true);
         jTree.setCellRenderer(new TreeNodeRenderer());
         jTree.setRootVisible(false);
         jTree.setToggleClickCount(0);
@@ -113,7 +114,7 @@ public class LeftTree {
 
     }
 
-    private class TreeNodeRenderer extends DefaultTreeCellRenderer {
+    private static class TreeNodeRenderer extends DefaultTreeCellRenderer {
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             LeftTreeNode treeNode = (LeftTreeNode) value;
             this.setText(String.valueOf(treeNode.getUserObject()));
@@ -123,9 +124,9 @@ public class LeftTree {
                 if (tree.isRootVisible()) {
                     // 如果根节点可见，则处理展开和叶子节点的情况
                     if (expanded) {
-                        setIcon(UIManager.getIcon("Tree.openIcon"));
+                        setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
                     } else {
-                        setIcon(UIManager.getIcon("Tree.closedIcon"));
+                        setIcon(ImageLoadUtil.getInstance().getFolderCloseIcon());
                     }
                 }
             } else {
@@ -133,9 +134,9 @@ public class LeftTree {
                 switch (treeNode.getTreeEntity().getNodeType()) {
                     case LeftTreeNodeType.FOLDER -> {
                         if (expanded) {
-                            this.setIcon(UIManager.getIcon("Tree.openIcon"));
+                            setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
                         } else {
-                            this.setIcon(UIManager.getIcon("Tree.closedIcon"));
+                            setIcon(ImageLoadUtil.getInstance().getFolderCloseIcon());
                         }
                     }
                     default -> log.info("default");

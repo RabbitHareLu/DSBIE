@@ -14,6 +14,8 @@ public class SysDataSource {
     public static final String DATASOURCE_NAME = "system";
     private static final String H2_DRIVER = "org.h2.Driver";
     private static final String H2_URL = "jdbc:h2:file:./db/KT";
+    // mac 系统需要新建在用户跟目录下  否则无法运行
+//    private static final String H2_URL = "jdbc:h2:file:~/db/KT";
     private static final String H2_USER_NAME = "system";
     private static final String H2_PASSWORD = "123456";
 

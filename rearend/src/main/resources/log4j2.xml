@@ -10,6 +10,8 @@
 
         <!-- 定义日志存储的路径 -->
         <property name="LOG_HOME" value="./dsbie_logs"/>
+<!--        mac 系统需要新建在用户跟目录下  否则无法运行-->
+<!--        <property name="LOG_HOME" value="~/dsbie_logs"/>-->
         <property name="LOG_FILE_NAME" value="dsbie"/>
     </Properties>
 
