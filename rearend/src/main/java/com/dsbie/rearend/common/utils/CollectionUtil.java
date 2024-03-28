@@ -1,4 +1,4 @@
-package com.dsbie.rearend.utils;
+package com.dsbie.rearend.common.utils;
 
 import java.util.Collection;
 import java.util.Map;

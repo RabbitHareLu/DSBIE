@@ -1,4 +1,4 @@
-package com.dsbie.rearend.utils;
+package com.dsbie.rearend.common.utils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author lsl
  * @version 1.0
- * @date 2024年03月27日 15:22
+ * @date 2023年11月23日 11:17
  */
 public class ReflectUtil {
 
@@ -29,5 +29,4 @@ public class ReflectUtil {
         Field[] fields = new Field[fieldList.size()];
         return fieldList.toArray(fields);
     }
-
 }

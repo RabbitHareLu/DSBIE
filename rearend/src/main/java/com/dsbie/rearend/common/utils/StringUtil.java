@@ -1,4 +1,4 @@
-package com.dsbie.rearend.utils;
+package com.dsbie.rearend.common.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,14 +161,16 @@ public class StringUtil {
 
 
     public static String requireNonNull(String str, String message) {
-        if (Objects.isNull(str))
+        if (Objects.isNull(str)) {
             throw new NullPointerException(message);
+        }
         return str;
     }
 
     public static String requireNonBlank(String str, String message) {
-        if (isBlank(str))
+        if (isBlank(str)) {
             throw new RuntimeException(message);
+        }
         return str;
     }
 
