@@ -52,7 +52,7 @@ public class LeftTree {
         jTree.setShowsRootHandles(true);
         jTree.setCellRenderer(new TreeNodeRenderer());
         jTree.setRootVisible(false);
-        jTree.setToggleClickCount(0);
+//        jTree.setToggleClickCount(0);
         jTree.addMouseListener(new TreeMouseAdapter());
     }
 
@@ -80,10 +80,6 @@ public class LeftTree {
     }
 
     private class TreeMouseAdapter extends MouseAdapter {
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            super.mouseClicked(e);
-        }
 
         @Override
         public void mousePressed(MouseEvent e) {
