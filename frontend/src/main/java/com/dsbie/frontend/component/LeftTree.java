@@ -2,6 +2,7 @@ package com.dsbie.frontend.component;
 
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
+import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
 import com.dsbie.rearend.api.SystemApi;
@@ -40,6 +41,8 @@ public class LeftTree {
 
     private JTree jTree;
     private DefaultTreeModel defaultTreeModel;
+
+    private FrameJPopupMenu frameJPopupMenu = FrameJPopupMenu.getInstance();
 
     private LeftTree() {
         LeftTreeNode root = initTree();
@@ -98,15 +101,24 @@ public class LeftTree {
                         jTree.setSelectionPath(path);
                         LeftTreeNode currentTreeNode = (LeftTreeNode) path.getLastPathComponent();
 
+                        if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.FOLDER)) {
+                            frameJPopupMenu.getFolderPopupMenu().show(jTree, x, y);
+                        } else if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.SCHEMA)) {
+//                            frameJPopupMenu.getSchemaPopupMenu().show(jTree, x, y);
+                        } else if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.TABLE)) {
+//                            frameJPopupMenu.getTablePopupMenu().show(jTree, x, y);
+                        } else {
+//                            frameJPopupMenu.getJdbcPopupMenu().show(jTree, x, y);
+                        }
                     } else {
                         // 如果在树的空白处点击
                         jTree.setSelectionPath(new TreePath(jTree.getModel().getRoot()));
-//                        AllJPopupMenu.getInstance().getRootPopupMenu().show(jTree, x, y);
+                        frameJPopupMenu.getRootPopupMenu().show(jTree, x, y);
                     }
                 } else {
                     // 当前菜单没有任何节点
                     jTree.setSelectionPath(new TreePath(jTree.getModel().getRoot()));
-//                    AllJPopupMenu.getInstance().getRootPopupMenu().show(jTree, x, y);
+                    frameJPopupMenu.getRootPopupMenu().show(jTree, x, y);
                 }
             }
         }
@@ -223,7 +235,7 @@ public class LeftTree {
                 try {
                     KToolsContext.getInstance().getApi(SystemApi.class).addNode(treeEntity);
                 } catch (KToolException ex) {
-//                    DialogUtil.showErrorDialog(Main.dsbieJFrame, ex.getMessage());
+                    DialogUtil.showErrorDialog(Main.dsbieJFrame, ex.getMessage());
                     throw new RuntimeException(ex);
                 }
 

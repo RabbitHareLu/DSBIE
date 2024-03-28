@@ -26,6 +26,10 @@ public class ImageLoadUtil {
     private ImageIcon exitIcon = null;
     private ImageIcon newJdbcIcon = null;
     private ImageIcon folderCloseIcon = null;
+    private ImageIcon deleteIcon = null;
+    private ImageIcon refreshIcon = null;
+    private ImageIcon renameIcon = null;
+    private ImageIcon tableIcon = null;
 
     private ImageLoadUtil() {
         logoIcon = buildIcon("images/logo.svg");
@@ -39,6 +43,10 @@ public class ImageLoadUtil {
         exitIcon = buildIcon("images/exit.svg");
         newJdbcIcon = buildIcon("images/newJdbc.svg");
         folderCloseIcon = buildIcon("images/folderClose.svg");
+        deleteIcon = buildIcon("images/delete.svg");
+        refreshIcon = buildIcon("images/refresh.svg");
+        renameIcon = buildIcon("images/rename.svg");
+        tableIcon = buildIcon("images/table.svg");
     }
 
     public static ImageLoadUtil getInstance() {
