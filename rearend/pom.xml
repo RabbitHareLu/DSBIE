@@ -49,31 +49,26 @@
         <dependency>
             <groupId>com.mybatis-flex</groupId>
             <artifactId>mybatis-flex-core</artifactId>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>de.siegmar</groupId>
             <artifactId>fastcsv</artifactId>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>
