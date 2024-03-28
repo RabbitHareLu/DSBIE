@@ -1,6 +1,7 @@
 package com.dsbie.frontend.frame;
 
 import com.dsbie.frontend.Main;
+import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.utils.FontUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
@@ -11,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.time.Year;
 import java.util.Objects;
 import java.util.Properties;
@@ -76,7 +75,7 @@ public class DsbieJFrame extends JFrame {
 
 
     private JScrollPane initTree() {
-        jTree = new JTree();
+        jTree = LeftTree.getInstance().getJTree();
         JScrollPane jTreeScrollPane = new JScrollPane(jTree);
         jTreeScrollPane.setMinimumSize(new Dimension(200, 0));
         return jTreeScrollPane;
@@ -121,6 +120,7 @@ public class DsbieJFrame extends JFrame {
 
             JMenuItem newFolder = new JMenuItem("新建文件夹");
             newFolder.setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
+            newFolder.addActionListener(new LeftTree.NewFolderAction());
             JMenu newJDBCConnection = new JMenu("新建JDBC连接");
             newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
             JMenuItem about = new JMenuItem("关于");

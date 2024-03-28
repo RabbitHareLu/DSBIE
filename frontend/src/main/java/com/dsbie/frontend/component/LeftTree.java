@@ -1,16 +1,29 @@
 package com.dsbie.frontend.component;
 
+import com.dsbie.frontend.Main;
+import com.dsbie.frontend.constant.LeftTreeNodeType;
+import com.dsbie.rearend.KToolsContext;
+import com.dsbie.rearend.api.SystemApi;
+import com.dsbie.rearend.common.utils.CollectionUtil;
+import com.dsbie.rearend.common.utils.StringUtil;
+import com.dsbie.rearend.exception.KToolException;
+import com.dsbie.rearend.manager.uid.UidKey;
+import com.dsbie.rearend.mybatis.entity.TreeEntity;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,12 +41,14 @@ public class LeftTree {
     private DefaultTreeModel defaultTreeModel;
 
     private LeftTree() {
-        TreeNode root = initTree();
+        LeftTreeNode root = initTree();
         defaultTreeModel = new DefaultTreeModel(root);
-        jTree.setShowsRootHandles(true);
+
+        jTree = new JTree(defaultTreeModel);
+        jTree.setShowsRootHandles(false);
         jTree.setCellRenderer(new TreeNodeRenderer());
         jTree.setRootVisible(false);
-//        jTree.setToggleClickCount(0);
+        jTree.setToggleClickCount(0);
         jTree.addMouseListener(new TreeMouseAdapter());
     }
 
@@ -41,8 +56,23 @@ public class LeftTree {
         return INSTANCE;
     }
 
-    private TreeNode initTree() {
-        return null;
+    private LeftTreeNode initTree() {
+        SystemApi api = KToolsContext.getInstance().getApi(SystemApi.class);
+        List<TreeEntity> tree = api.getTree(0);
+
+        LeftTreeNode rootNode = new LeftTreeNode(0, null, "ROOT", LeftTreeNodeType.ROOT, "ROOT");
+        buildTree(rootNode, tree.getFirst().getChild());
+        return rootNode;
+    }
+
+    private void buildTree(LeftTreeNode parentNode, List<TreeEntity> children) {
+        if (CollectionUtil.isNotEmpty(children)) {
+            for (TreeEntity child : children) {
+                LeftTreeNode treeNode = new LeftTreeNode(child);
+                parentNode.add(treeNode);
+                buildTree(treeNode, child.getChild());
+            }
+        }
     }
 
     private class TreeMouseAdapter extends MouseAdapter {
@@ -65,7 +95,7 @@ public class LeftTree {
                     if (y >= pathBounds.getY() && y <= (pathBounds.getY() + pathBounds.getHeight())) {
                         // 如果在树的节点上点击
                         jTree.setSelectionPath(path);
-
+                        LeftTreeNode currentTreeNode = (LeftTreeNode) path.getLastPathComponent();
 
                     } else {
                         // 如果在树的空白处点击
@@ -85,8 +115,122 @@ public class LeftTree {
 
     private class TreeNodeRenderer extends DefaultTreeCellRenderer {
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-            TreeNode treeNode = (TreeNode) value;
+            LeftTreeNode treeNode = (LeftTreeNode) value;
+            this.setText(String.valueOf(treeNode.getUserObject()));
+
+            // 处理根节点的展开和叶子节点的情况
+            if (Objects.isNull(treeNode.getParent())) {
+                if (tree.isRootVisible()) {
+                    // 如果根节点可见，则处理展开和叶子节点的情况
+                    if (expanded) {
+                        setIcon(UIManager.getIcon("Tree.openIcon"));
+                    } else {
+                        setIcon(UIManager.getIcon("Tree.closedIcon"));
+                    }
+                }
+            } else {
+                // 非根节点
+                switch (treeNode.getTreeEntity().getNodeType()) {
+                    case LeftTreeNodeType.FOLDER -> {
+                        if (expanded) {
+                            this.setIcon(UIManager.getIcon("Tree.openIcon"));
+                        } else {
+                            this.setIcon(UIManager.getIcon("Tree.closedIcon"));
+                        }
+                    }
+                    default -> log.info("default");
+                }
+            }
             return this;
+        }
+    }
+
+    public TreePath getCurrentTreePath() {
+        TreePath selectionPath = jTree.getSelectionPath();
+
+        // 如果selectionPath为null, 说明未选择任何节点, 因此直接默认在根节点的目录下创建
+        if (Objects.isNull(selectionPath)) {
+            selectionPath = new TreePath(jTree.getModel().getRoot());
+        }
+        return selectionPath;
+    }
+
+    public LeftTreeNode getCurrentTreeNode(TreePath treePath) {
+        return (LeftTreeNode) treePath.getLastPathComponent();
+    }
+
+    public void buildTreeNodePath(List<String> list, TreePath selectionPath) {
+        LeftTreeNode currentTreeNode = (LeftTreeNode) selectionPath.getLastPathComponent();
+        Integer id = currentTreeNode.getTreeEntity().getId();
+        list.add(String.valueOf(id));
+
+        TreePath parentPath = selectionPath.getParentPath();
+        if (Objects.nonNull(parentPath)) {
+            buildTreeNodePath(list, parentPath);
+        }
+    }
+
+    public String getNodePathString(List<String> nodePathList) {
+        StringBuilder nodePathString = new StringBuilder();
+        for (int i = nodePathList.size() - 1; i >= 0; i--) {
+            nodePathString.append(nodePathList.get(i)).append("/");
+        }
+        return nodePathString.delete(nodePathString.length() - 1, nodePathString.length()).toString();
+    }
+
+    public TreeModel getTreeModel() {
+        return jTree.getModel();
+    }
+
+    public void expandTreeNode(TreePath selectionPath) {
+        if (Objects.nonNull(selectionPath)) {
+            if (!jTree.isExpanded(selectionPath)) {
+                jTree.expandPath(selectionPath);
+            }
+        }
+    }
+
+    public static class NewFolderAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            LeftTree instance = getInstance();
+            TreePath selectionPath = instance.getCurrentTreePath();
+            LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
+
+            String result = JOptionPane.showInputDialog(
+                    Main.dsbieJFrame,
+                    "目录名称",
+                    "新建文件夹",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            if (StringUtil.isNotBlank(result)) {
+                log.info("新建文件夹: {}", result);
+
+                TreeEntity treeEntity = new TreeEntity();
+                treeEntity.setId(KToolsContext.getInstance().getIdGenerator().getId(UidKey.TREE));
+                treeEntity.setParentNodeId(currentTreeNode.getTreeEntity().getId());
+                treeEntity.setNodeName(result);
+                treeEntity.setNodeType(LeftTreeNodeType.FOLDER);
+                treeEntity.setNodeComment(null);
+                treeEntity.setChild(null);
+
+                List<String> nodePathList = new ArrayList<>();
+                instance.buildTreeNodePath(nodePathList, selectionPath);
+                treeEntity.setNodePath(instance.getNodePathString(nodePathList));
+
+                try {
+                    KToolsContext.getInstance().getApi(SystemApi.class).addNode(treeEntity);
+                } catch (KToolException ex) {
+//                    DialogUtil.showErrorDialog(Main.dsbieJFrame, ex.getMessage());
+                    throw new RuntimeException(ex);
+                }
+
+                LeftTreeNode treeNode = new LeftTreeNode(treeEntity);
+                DefaultTreeModel model = (DefaultTreeModel) instance.getTreeModel();
+                model.insertNodeInto(treeNode, currentTreeNode, currentTreeNode.getChildCount());
+                instance.expandTreeNode(selectionPath);
+            }
         }
     }
 }
