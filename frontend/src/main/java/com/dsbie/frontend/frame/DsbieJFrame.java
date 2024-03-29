@@ -1,6 +1,7 @@
 package com.dsbie.frontend.frame;
 
 import com.dsbie.frontend.Main;
+import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.utils.FontUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
@@ -104,6 +105,11 @@ public class DsbieJFrame extends JFrame {
             });
             fileMenu.add(newMenu);
             fileMenu.add(exitMenu);
+
+            JMenuItem renameMenu = new JMenuItem("重命名");
+            renameMenu.setIcon(ImageLoadUtil.getInstance().getRenameIcon());
+            renameMenu.addActionListener(new FrameJPopupMenu.RenameFolderAction());
+            editMenu.add(renameMenu);
 
             JMenu fontMenu = new JMenu("字体");
             fontMenu.setIcon(ImageLoadUtil.getInstance().getFontIcon());
