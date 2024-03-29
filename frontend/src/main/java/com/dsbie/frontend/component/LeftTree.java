@@ -156,6 +156,17 @@ public class LeftTree {
         }
     }
 
+    public TreeEntity getCurrentTreeEntity() {
+        TreePath selectionPath = jTree.getSelectionPath();
+
+        // 如果selectionPath为null, 说明未选择任何节点, 因此直接默认在根节点的目录下创建
+        if (Objects.isNull(selectionPath)) {
+            selectionPath = new TreePath(jTree.getModel().getRoot());
+        }
+        return ((LeftTreeNode) selectionPath.getLastPathComponent()).getTreeEntity();
+    }
+
+
     public TreePath getCurrentTreePath() {
         TreePath selectionPath = jTree.getSelectionPath();
 

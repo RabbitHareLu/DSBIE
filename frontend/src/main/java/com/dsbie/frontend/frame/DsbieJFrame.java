@@ -3,13 +3,15 @@ package com.dsbie.frontend.frame;
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
+import com.dsbie.frontend.panel.JdbcConnectionJPanel;
 import com.dsbie.frontend.threadpool.FrontendThreadPool;
 import com.dsbie.frontend.utils.FontUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
 import com.dsbie.rearend.api.SystemApi;
 import com.formdev.flatlaf.FlatClientProperties;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -25,7 +27,8 @@ import java.util.concurrent.CompletableFuture;
  * @date 2024年03月27日 15:16
  */
 @Slf4j
-@Data
+@Getter
+@Setter
 public class DsbieJFrame extends JFrame {
 
     private static final int WIDTH = 1200;
@@ -35,6 +38,8 @@ public class DsbieJFrame extends JFrame {
     public static JMenuBar jMenuBar = null;
     public static JSplitPane rootJSplitPane = null;
     public static JTree jTree = null;
+    public static JTabbedPane closableTabsTabbedPane = null;
+    public static JLabel logoLabel = null;
 
     private String[] fontStyleArr = new String[]{"普通", "斜体", "粗体"};
 
@@ -77,7 +82,7 @@ public class DsbieJFrame extends JFrame {
 
 
     private JScrollPane initPanel() {
-        JLabel logoLabel = new JLabel(ImageLoadUtil.getInstance().getLogoIcon());
+        logoLabel = new JLabel(ImageLoadUtil.getInstance().getLogoIcon());
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BorderLayout());
@@ -151,12 +156,20 @@ public class DsbieJFrame extends JFrame {
 
             setAboutAction(about);
             initFontMenu(fontNameMenu, fontSizeMenu, fontStyleMenu);
+            initDataSourceMenu(newJDBCConnection);
 
             SwingUtilities.invokeLater(() -> {
                 add(jMenuBar, BorderLayout.NORTH);
                 validate();
             });
         }, FrontendThreadPool.getInstance().getExecutorService());
+    }
+
+    private void initDataSourceMenu(JMenu newJDBCConnection) {
+        JMenuItem jMenuItem = new JMenuItem("Mysql");
+//        jMenuItem.setIcon(ImageLoadUtil.getInstance().buildIcon(metadata.getLogo()));
+        jMenuItem.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
+        newJDBCConnection.add(jMenuItem);
     }
 
     private void initFontMenu(JMenu fontNameMenu, JMenu fontSizeMenu, JMenu fontStyleMenu) {

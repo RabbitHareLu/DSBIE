@@ -2,6 +2,7 @@ package com.dsbie.frontend.component;
 
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
+import com.dsbie.frontend.frame.DsbieJFrame;
 import com.dsbie.frontend.threadpool.FrontendThreadPool;
 import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
@@ -32,14 +33,27 @@ public class FrameJPopupMenu {
     private static final FrameJPopupMenu INSTANCE = new FrameJPopupMenu();
     private JPopupMenu rootPopupMenu;
     private JPopupMenu folderPopupMenu;
+    private JPopupMenu tabbedPanePopupMenu;
 
     private FrameJPopupMenu() {
         initRootPopupMenu();
         initFolderPopupMenu();
+        initTabbedPanePopupMenu();
     }
 
     public static FrameJPopupMenu getInstance() {
         return INSTANCE;
+    }
+
+    private void initTabbedPanePopupMenu() {
+        tabbedPanePopupMenu = new JPopupMenu();
+        JMenuItem closeTabbedItem = new JMenuItem("关闭所有");
+        closeTabbedItem.setIcon(ImageLoadUtil.getInstance().getCloseTabbedIcon());
+        closeTabbedItem.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+            DsbieJFrame.closableTabsTabbedPane.removeAll();
+            DsbieJFrame.rootJSplitPane.setRightComponent(DsbieJFrame.logoLabel);
+        }));
+        tabbedPanePopupMenu.add(closeTabbedItem);
     }
 
     private void initRootPopupMenu() {
