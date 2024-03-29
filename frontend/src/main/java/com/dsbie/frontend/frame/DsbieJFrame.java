@@ -3,7 +3,6 @@ package com.dsbie.frontend.frame;
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
-import com.dsbie.frontend.threadpool.FrontendThreadPool;
 import com.dsbie.frontend.utils.FontUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
