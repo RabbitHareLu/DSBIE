@@ -2,6 +2,7 @@ package com.dsbie.frontend.component;
 
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
+import com.dsbie.frontend.threadpool.FrontendThreadPool;
 import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
@@ -245,7 +246,7 @@ public class LeftTree {
                         instance.expandTreeNode(selectionPath);
                     });
                 }
-            },  KToolsContext.getInstance().getTaskManager().getExecutorService());
+            }, FrontendThreadPool.getInstance().getExecutorService());
         }
     }
 }

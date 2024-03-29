@@ -1,6 +1,7 @@
 package com.dsbie.frontend.utils;
 
 import com.dsbie.frontend.component.FrameJPopupMenu;
+import com.dsbie.frontend.threadpool.FrontendThreadPool;
 import com.dsbie.rearend.KToolsContext;
 import com.formdev.flatlaf.FlatLaf;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class FontUtil {
                 String fontStyle = String.valueOf(properties.get("font.style"));
                 log.info("初始化界面字体: {} {} {}", fontName, fontSize, fontStyle);
                 UIManager.put("defaultFont", new Font(fontName, FontUtil.getFontStyle(fontStyle), fontSize));
-            },  KToolsContext.getInstance().getTaskManager().getExecutorService()).get();
+            }, FrontendThreadPool.getInstance().getExecutorService()).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

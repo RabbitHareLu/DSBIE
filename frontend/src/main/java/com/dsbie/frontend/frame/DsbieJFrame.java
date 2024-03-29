@@ -3,6 +3,7 @@ package com.dsbie.frontend.frame;
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
+import com.dsbie.frontend.threadpool.FrontendThreadPool;
 import com.dsbie.frontend.utils.FontUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
@@ -71,7 +72,7 @@ public class DsbieJFrame extends JFrame {
                 validate();
             });
 
-        },  KToolsContext.getInstance().getTaskManager().getExecutorService());
+        }, FrontendThreadPool.getInstance().getExecutorService());
     }
 
 
@@ -155,7 +156,7 @@ public class DsbieJFrame extends JFrame {
                 add(jMenuBar, BorderLayout.NORTH);
                 validate();
             });
-        },  KToolsContext.getInstance().getTaskManager().getExecutorService());
+        }, FrontendThreadPool.getInstance().getExecutorService());
     }
 
     private void initFontMenu(JMenu fontNameMenu, JMenu fontSizeMenu, JMenu fontStyleMenu) {
@@ -183,7 +184,7 @@ public class DsbieJFrame extends JFrame {
 
                 log.info("修改字体名称为: {}", newFontName);
                 SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(newFontName, FontUtil.getFontStyle(fontStyle1), fontSize1)));
-            },  KToolsContext.getInstance().getTaskManager().getExecutorService()));
+            }, FrontendThreadPool.getInstance().getExecutorService()));
 
             fontNameGroup.add(jCheckBoxMenuItem);
             fontNameMenu.add(jCheckBoxMenuItem);
@@ -208,7 +209,7 @@ public class DsbieJFrame extends JFrame {
 
                 log.info("修改字体大小为: {}", newFontSize);
                 SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(fontName1, FontUtil.getFontStyle(fontStyle12), newFontSize)));
-            },  KToolsContext.getInstance().getTaskManager().getExecutorService()));
+            }, FrontendThreadPool.getInstance().getExecutorService()));
             fontSizeGroup.add(jCheckBoxMenuItem);
             fontSizeMenu.add(jCheckBoxMenuItem);
         }
@@ -232,7 +233,7 @@ public class DsbieJFrame extends JFrame {
 
                 log.info("修改字体样式为: {}", newFontStyle);
                 SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(fontName12, FontUtil.getFontStyle(newFontStyle), fontSize12)));
-            },  KToolsContext.getInstance().getTaskManager().getExecutorService()));
+            }, FrontendThreadPool.getInstance().getExecutorService()));
             fontStyleGroup.add(jCheckBoxMenuItem);
             fontStyleMenu.add(jCheckBoxMenuItem);
         }
