@@ -48,6 +48,7 @@ public class DsbieJFrame extends JFrame {
 
         init();
         setVisible(true);
+        validate();
     }
 
     private void init() {
@@ -58,13 +59,12 @@ public class DsbieJFrame extends JFrame {
     private void initRootJSplitPane() {
         CompletableFuture.runAsync(() -> {
             rootJSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-            rootJSplitPane.setDividerSize(3);
+            rootJSplitPane.setDividerSize(2);
             JScrollPane jTreeScrollPane = initTree();
             rootJSplitPane.setLeftComponent(jTreeScrollPane);
 
-            JScrollPane jTextAreaScrollPane = new JScrollPane(new JTextArea());
-            jTextAreaScrollPane.setMinimumSize(new Dimension(200, 0));
-            rootJSplitPane.setRightComponent(jTextAreaScrollPane);
+            JScrollPane jPanelScrollPane = initPanel();
+            rootJSplitPane.setRightComponent(jPanelScrollPane);
 
             SwingUtilities.invokeLater(() -> {
                 add(rootJSplitPane, BorderLayout.CENTER);
@@ -72,6 +72,19 @@ public class DsbieJFrame extends JFrame {
             });
 
         });
+    }
+
+
+    private JScrollPane initPanel() {
+        JLabel logoLabel = new JLabel(ImageLoadUtil.getInstance().getLogoIcon());
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new BorderLayout());
+        jPanel.add(logoLabel, BorderLayout.CENTER);
+
+        JScrollPane jPanelScrollPane = new JScrollPane(jPanel);
+        jPanelScrollPane.setMinimumSize(new Dimension(200, 0));
+        return jPanelScrollPane;
     }
 
 
