@@ -31,7 +31,6 @@ public class ImageLoadUtil {
     private ImageIcon renameIcon = null;
     private ImageIcon tableIcon = null;
     private ImageIcon closeTabbedIcon = null;
-    private ImageIcon closeAllTabbedIcon = null;
 
     private ImageLoadUtil() {
         logoIcon = buildIcon("images/logo.svg");
@@ -50,7 +49,6 @@ public class ImageLoadUtil {
         renameIcon = buildIcon("images/rename.svg");
         tableIcon = buildIcon("images/table.svg");
         closeTabbedIcon = buildIcon("images/closeTabbed.svg");
-        closeAllTabbedIcon = buildIcon("images/closeAllTabbed.svg");
     }
 
     public static ImageLoadUtil getInstance() {
