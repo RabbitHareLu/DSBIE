@@ -3,7 +3,7 @@ package com.dsbie.frontend.component;
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
-import com.dsbie.frontend.threadpool.FrontendThreadPool;
+import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
@@ -20,7 +20,6 @@ import javax.swing.tree.TreePath;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author lsl
@@ -86,7 +85,7 @@ public class FrameJPopupMenu {
     private static class DeleteTreeNodeAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            CompletableFuture.runAsync(() -> {
+            CompletableFutureUtil.submit(() -> {
                 JTree jTree = LeftTree.getInstance().getJTree();
                 TreePath selectionPath = jTree.getSelectionPath();
 
@@ -104,8 +103,7 @@ public class FrameJPopupMenu {
                         });
                     }
                 }
-            }, FrontendThreadPool.getInstance().getExecutorService());
-
+            });
         }
     }
 
@@ -113,7 +111,7 @@ public class FrameJPopupMenu {
     public static class RenameFolderAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            CompletableFuture.runAsync(() -> {
+            CompletableFutureUtil.submit(() -> {
                 LeftTree instance = LeftTree.getInstance();
                 TreePath selectionPath = instance.getCurrentTreePath();
                 LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
@@ -159,8 +157,7 @@ public class FrameJPopupMenu {
                         }
                     }
                 }
-            }, FrontendThreadPool.getInstance().getExecutorService());
-
+            });
         }
     }
 }

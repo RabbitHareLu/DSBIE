@@ -2,7 +2,7 @@ package com.dsbie.frontend.component;
 
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
-import com.dsbie.frontend.threadpool.FrontendThreadPool;
+import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
@@ -28,7 +28,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author lsl
@@ -215,7 +214,7 @@ public class LeftTree {
     public static class NewFolderAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            CompletableFuture.runAsync(() -> {
+            CompletableFutureUtil.submit(() -> {
                 LeftTree instance = getInstance();
                 TreePath selectionPath = instance.getCurrentTreePath();
                 LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
@@ -257,7 +256,7 @@ public class LeftTree {
                         instance.expandTreeNode(selectionPath);
                     });
                 }
-            }, FrontendThreadPool.getInstance().getExecutorService());
+            });
         }
     }
 }

@@ -2,8 +2,9 @@ package com.dsbie.frontend.panel;
 
 import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
+import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
-import com.dsbie.frontend.threadpool.FrontendThreadPool;
+import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
@@ -43,9 +43,16 @@ public class JdbcConnectionJPanel extends JPanel {
 
     public JdbcConnectionJPanel(TreeEntity treeEntity) {
         setLayout(new BorderLayout());
+        Box northBox = null;
+        Box centerBox = null;
 
-        Box northBox = initNorthBox(treeEntity.getNodeName(), treeEntity.getNodeComment());
-        Box centerBox = initCenterBox(treeEntity);
+        if (Objects.nonNull(treeEntity)) {
+            northBox = initNorthBox(treeEntity.getNodeName(), treeEntity.getNodeComment());
+            centerBox = initCenterBox(treeEntity);
+        } else {
+            northBox = initNorthBox(null, null);
+            centerBox = initCenterBox(null);
+        }
         Box southBox = initSouthBox();
 
         add(northBox, BorderLayout.NORTH);
@@ -134,19 +141,25 @@ public class JdbcConnectionJPanel extends JPanel {
     public static class CreateJdbcConnectionJPanelAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            CompletableFuture.runAsync(() -> {
+            CompletableFutureUtil.submit(() -> {
                 JMenuItem source = (JMenuItem) e.getSource();
                 initTabbedPane();
                 SwingUtilities.invokeLater(() -> DsbieJFrame.rootJSplitPane.setRightComponent(DsbieJFrame.closableTabsTabbedPane));
 
                 TreeEntity currentTreeEntity = LeftTree.getInstance().getCurrentTreeEntity();
+                JdbcConnectionJPanel jdbcConnectionJPanel = null;
+                if (Objects.equals(currentTreeEntity.getNodeType(), LeftTreeNodeType.CONNECTION)) {
+                    jdbcConnectionJPanel = new JdbcConnectionJPanel(currentTreeEntity);
+                } else {
+                    jdbcConnectionJPanel = new JdbcConnectionJPanel(null);
+                }
 
-                JdbcConnectionJPanel jdbcConnectionJPanel = new JdbcConnectionJPanel(currentTreeEntity);
+                JdbcConnectionJPanel finalJdbcConnectionJPanel = jdbcConnectionJPanel;
                 SwingUtilities.invokeLater(() -> {
-                    Component add = DsbieJFrame.closableTabsTabbedPane.add("新建" + source.getText() + "数据源", jdbcConnectionJPanel);
+                    Component add = DsbieJFrame.closableTabsTabbedPane.add("新建" + source.getText() + "数据源", finalJdbcConnectionJPanel);
                     DsbieJFrame.closableTabsTabbedPane.setSelectedComponent(add);
                 });
-            }, FrontendThreadPool.getInstance().getExecutorService());
+            });
         }
 
         private static void initTabbedPane() {
@@ -189,10 +202,7 @@ public class JdbcConnectionJPanel extends JPanel {
     @Setter
     private class RegularJPanel extends JPanel {
 
-        private TreeEntity treeEntity;
-
         public RegularJPanel() {
-
         }
 
         public RegularJPanel(TreeEntity treeEntity) {
@@ -204,8 +214,6 @@ public class JdbcConnectionJPanel extends JPanel {
     @Getter
     @Setter
     private class AdvancedJPanel extends JPanel {
-
-        private TreeEntity treeEntity;
 
         public AdvancedJPanel() {
 

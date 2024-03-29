@@ -5,6 +5,7 @@ import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.panel.JdbcConnectionJPanel;
 import com.dsbie.frontend.threadpool.FrontendThreadPool;
+import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.FontUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
@@ -63,7 +64,7 @@ public class DsbieJFrame extends JFrame {
     }
 
     private void initRootJSplitPane() {
-        CompletableFuture.runAsync(() -> {
+        CompletableFutureUtil.submit(() -> {
             rootJSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
             rootJSplitPane.setDividerSize(2);
             JScrollPane jTreeScrollPane = initTree();
@@ -76,8 +77,7 @@ public class DsbieJFrame extends JFrame {
                 add(rootJSplitPane, BorderLayout.CENTER);
                 validate();
             });
-
-        }, FrontendThreadPool.getInstance().getExecutorService());
+        });
     }
 
 
@@ -102,7 +102,7 @@ public class DsbieJFrame extends JFrame {
     }
 
     private void initMenu() {
-        CompletableFuture.runAsync(() -> {
+        CompletableFutureUtil.submit(() -> {
             jMenuBar = new JMenuBar();
 
             JMenu fileMenu = new JMenu("文件");
@@ -162,7 +162,7 @@ public class DsbieJFrame extends JFrame {
                 add(jMenuBar, BorderLayout.NORTH);
                 validate();
             });
-        }, FrontendThreadPool.getInstance().getExecutorService());
+        });
     }
 
     private void initDataSourceMenu(JMenu newJDBCConnection) {
@@ -187,7 +187,7 @@ public class DsbieJFrame extends JFrame {
                 jCheckBoxMenuItem.setSelected(true);
             }
 
-            jCheckBoxMenuItem.addActionListener(e -> CompletableFuture.runAsync(() -> {
+            jCheckBoxMenuItem.addActionListener(e -> CompletableFutureUtil.submit(() -> {
                 Properties properties1 = KToolsContext.getInstance().getProperties();
                 Integer fontSize1 = Integer.parseInt(String.valueOf(properties1.get("font.size")));
                 String fontStyle1 = String.valueOf(properties1.get("font.style"));
@@ -197,7 +197,7 @@ public class DsbieJFrame extends JFrame {
 
                 log.info("修改字体名称为: {}", newFontName);
                 SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(newFontName, FontUtil.getFontStyle(fontStyle1), fontSize1)));
-            }, FrontendThreadPool.getInstance().getExecutorService()));
+            }));
 
             fontNameGroup.add(jCheckBoxMenuItem);
             fontNameMenu.add(jCheckBoxMenuItem);
@@ -210,7 +210,7 @@ public class DsbieJFrame extends JFrame {
                 jCheckBoxMenuItem.setSelected(true);
             }
 
-            jCheckBoxMenuItem.addActionListener(e -> CompletableFuture.runAsync(() -> {
+            jCheckBoxMenuItem.addActionListener(e -> CompletableFutureUtil.submit(() -> {
                 Properties properties12 = KToolsContext.getInstance().getProperties();
                 String fontName1 = String.valueOf(properties12.get("font.name"));
                 String fontStyle12 = String.valueOf(properties12.get("font.style"));
@@ -222,7 +222,7 @@ public class DsbieJFrame extends JFrame {
 
                 log.info("修改字体大小为: {}", newFontSize);
                 SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(fontName1, FontUtil.getFontStyle(fontStyle12), newFontSize)));
-            }, FrontendThreadPool.getInstance().getExecutorService()));
+            }));
             fontSizeGroup.add(jCheckBoxMenuItem);
             fontSizeMenu.add(jCheckBoxMenuItem);
         }
@@ -234,7 +234,7 @@ public class DsbieJFrame extends JFrame {
                 jCheckBoxMenuItem.setSelected(true);
             }
 
-            jCheckBoxMenuItem.addActionListener(e -> CompletableFuture.runAsync(() -> {
+            jCheckBoxMenuItem.addActionListener(e -> CompletableFutureUtil.submit(() -> {
                 Properties properties13 = KToolsContext.getInstance().getProperties();
                 String fontName12 = String.valueOf(properties13.get("font.name"));
                 Integer fontSize12 = Integer.parseInt(String.valueOf(properties13.get("font.size")));
@@ -246,7 +246,7 @@ public class DsbieJFrame extends JFrame {
 
                 log.info("修改字体样式为: {}", newFontStyle);
                 SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(fontName12, FontUtil.getFontStyle(newFontStyle), fontSize12)));
-            }, FrontendThreadPool.getInstance().getExecutorService()));
+            }));
             fontStyleGroup.add(jCheckBoxMenuItem);
             fontStyleMenu.add(jCheckBoxMenuItem);
         }
