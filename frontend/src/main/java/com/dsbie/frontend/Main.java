@@ -3,10 +3,8 @@ package com.dsbie.frontend;
 import com.dsbie.frontend.frame.DsbieJFrame;
 import com.dsbie.frontend.utils.FontUtil;
 import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.FlatLaf;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class Main {
     public static DsbieJFrame dsbieJFrame = null;

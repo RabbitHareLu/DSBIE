@@ -173,7 +173,7 @@ public class DsbieJFrame extends JFrame {
                 jCheckBoxMenuItem.setSelected(true);
             }
 
-            jCheckBoxMenuItem.addActionListener(e -> {
+            jCheckBoxMenuItem.addActionListener(e -> CompletableFuture.runAsync(() -> {
                 Properties properties1 = KToolsContext.getInstance().getProperties();
                 Integer fontSize1 = Integer.parseInt(String.valueOf(properties1.get("font.size")));
                 String fontStyle1 = String.valueOf(properties1.get("font.style"));
@@ -182,8 +182,8 @@ public class DsbieJFrame extends JFrame {
                 KToolsContext.getInstance().getApi(SystemApi.class).saveOrUpdateProp("font.name", newFontName);
 
                 log.info("修改字体名称为: {}", newFontName);
-                FontUtil.updateUIFont(new Font(newFontName, FontUtil.getFontStyle(fontStyle1), fontSize1));
-            });
+                SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(newFontName, FontUtil.getFontStyle(fontStyle1), fontSize1)));
+            }));
 
             fontNameGroup.add(jCheckBoxMenuItem);
             fontNameMenu.add(jCheckBoxMenuItem);
@@ -196,7 +196,7 @@ public class DsbieJFrame extends JFrame {
                 jCheckBoxMenuItem.setSelected(true);
             }
 
-            jCheckBoxMenuItem.addActionListener(e -> {
+            jCheckBoxMenuItem.addActionListener(e -> CompletableFuture.runAsync(() -> {
                 Properties properties12 = KToolsContext.getInstance().getProperties();
                 String fontName1 = String.valueOf(properties12.get("font.name"));
                 String fontStyle12 = String.valueOf(properties12.get("font.style"));
@@ -207,8 +207,8 @@ public class DsbieJFrame extends JFrame {
                 KToolsContext.getInstance().getApi(SystemApi.class).saveOrUpdateProp("font.size", String.valueOf(newFontSize));
 
                 log.info("修改字体大小为: {}", newFontSize);
-                FontUtil.updateUIFont(new Font(fontName1, FontUtil.getFontStyle(fontStyle12), newFontSize));
-            });
+                SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(fontName1, FontUtil.getFontStyle(fontStyle12), newFontSize)));
+            }));
             fontSizeGroup.add(jCheckBoxMenuItem);
             fontSizeMenu.add(jCheckBoxMenuItem);
         }
@@ -220,7 +220,7 @@ public class DsbieJFrame extends JFrame {
                 jCheckBoxMenuItem.setSelected(true);
             }
 
-            jCheckBoxMenuItem.addActionListener(e -> {
+            jCheckBoxMenuItem.addActionListener(e -> CompletableFuture.runAsync(() -> {
                 Properties properties13 = KToolsContext.getInstance().getProperties();
                 String fontName12 = String.valueOf(properties13.get("font.name"));
                 Integer fontSize12 = Integer.parseInt(String.valueOf(properties13.get("font.size")));
@@ -231,8 +231,8 @@ public class DsbieJFrame extends JFrame {
                 KToolsContext.getInstance().getApi(SystemApi.class).saveOrUpdateProp("font.style", newFontStyle);
 
                 log.info("修改字体样式为: {}", newFontStyle);
-                FontUtil.updateUIFont(new Font(fontName12, FontUtil.getFontStyle(newFontStyle), fontSize12));
-            });
+                SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(fontName12, FontUtil.getFontStyle(newFontStyle), fontSize12)));
+            }));
             fontStyleGroup.add(jCheckBoxMenuItem);
             fontStyleMenu.add(jCheckBoxMenuItem);
         }
@@ -250,7 +250,6 @@ public class DsbieJFrame extends JFrame {
                             "Copyright 2024-" + Year.now() + " Liu sl, Wang cg",
                     },
                     "About", JOptionPane.PLAIN_MESSAGE);
-
         });
     }
 }

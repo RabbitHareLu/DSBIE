@@ -18,6 +18,7 @@ import javax.swing.tree.TreePath;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author lsl
@@ -70,22 +71,26 @@ public class FrameJPopupMenu {
     private static class DeleteTreeNodeAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            JTree jTree = LeftTree.getInstance().getJTree();
-            TreePath selectionPath = jTree.getSelectionPath();
+            CompletableFuture.runAsync(() -> {
+                JTree jTree = LeftTree.getInstance().getJTree();
+                TreePath selectionPath = jTree.getSelectionPath();
 
-            if (Objects.nonNull(selectionPath)) {
-                int result = JOptionPane.showConfirmDialog(Main.dsbieJFrame, new Object[]{"是否删除当前节点"}, "删除", JOptionPane.YES_NO_OPTION);
-                if (result == JOptionPane.YES_OPTION) {
-                    LeftTreeNode currentTreeNode = (LeftTreeNode) selectionPath.getLastPathComponent();
-                    log.info("删除节点: {}", currentTreeNode.getUserObject());
+                if (Objects.nonNull(selectionPath)) {
+                    int result = JOptionPane.showConfirmDialog(Main.dsbieJFrame, new Object[]{"是否删除当前节点"}, "删除", JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        LeftTreeNode currentTreeNode = (LeftTreeNode) selectionPath.getLastPathComponent();
+                        log.info("删除节点: {}", currentTreeNode.getUserObject());
 
-                    TreeEntity treeEntity = currentTreeNode.getTreeEntity();
-                    KToolsContext.getInstance().getApi(SystemApi.class).deleteNode(treeEntity);
-
-                    DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
-                    model.removeNodeFromParent(currentTreeNode);
+                        TreeEntity treeEntity = currentTreeNode.getTreeEntity();
+                        KToolsContext.getInstance().getApi(SystemApi.class).deleteNode(treeEntity);
+                        SwingUtilities.invokeLater(() -> {
+                            DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
+                            model.removeNodeFromParent(currentTreeNode);
+                        });
+                    }
                 }
-            }
+            });
+
         }
     }
 
@@ -93,47 +98,53 @@ public class FrameJPopupMenu {
     public static class RenameFolderAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            LeftTree instance = LeftTree.getInstance();
-            TreePath selectionPath = instance.getCurrentTreePath();
-            LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
-            if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.ROOT)) {
-                DialogUtil.showErrorDialog(Main.dsbieJFrame, "请先选中一个节点进行编辑!");
-                throw new RuntimeException("不允许重命名Root节点");
-            }
+            CompletableFuture.runAsync(() -> {
+                LeftTree instance = LeftTree.getInstance();
+                TreePath selectionPath = instance.getCurrentTreePath();
+                LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
+                if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.ROOT)) {
+                    DialogUtil.showErrorDialog(Main.dsbieJFrame, "请先选中一个节点进行编辑!");
+                    throw new RuntimeException("不允许重命名Root节点");
+                }
 
-            String oldNodeName = currentTreeNode.getTreeEntity().getNodeName();
+                String oldNodeName = currentTreeNode.getTreeEntity().getNodeName();
 
-            Object o = JOptionPane.showInputDialog(
-                    Main.dsbieJFrame,
-                    "目录名称",
-                    "重命名文件夹",
-                    JOptionPane.INFORMATION_MESSAGE,
-                    null, null, oldNodeName
-            );
+                Object o = JOptionPane.showInputDialog(
+                        Main.dsbieJFrame,
+                        "目录名称",
+                        "重命名文件夹",
+                        JOptionPane.INFORMATION_MESSAGE,
+                        null, null, oldNodeName
+                );
 
-            if (Objects.nonNull(o)) {
-                String result = String.valueOf(o);
-                if (StringUtil.isNotBlank(result)) {
-                    log.info("重命名文件夹: {} -> {}", oldNodeName, result);
-                    if (!Objects.equals(oldNodeName, result)) {
-                        TreeEntity treeEntity = currentTreeNode.getTreeEntity();
-                        treeEntity.setNodeName(result);
+                if (Objects.nonNull(o)) {
+                    String result = String.valueOf(o);
+                    if (StringUtil.isNotBlank(result)) {
+                        log.info("重命名文件夹: {} -> {}", oldNodeName, result);
+                        if (!Objects.equals(oldNodeName, result)) {
+                            TreeEntity treeEntity = currentTreeNode.getTreeEntity();
+                            treeEntity.setNodeName(result);
 
-                        JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor((JMenuItem) e.getSource());
-                        try {
-                            KToolsContext.getInstance().getApi(SystemApi.class).updateNode(treeEntity);
-                        } catch (KToolException ex) {
-                            DialogUtil.showErrorDialog(jFrame, ex.getMessage());
-                            throw new RuntimeException(ex);
+                            JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor((JMenuItem) e.getSource());
+                            try {
+                                KToolsContext.getInstance().getApi(SystemApi.class).updateNode(treeEntity);
+                            } catch (KToolException ex) {
+                                DialogUtil.showErrorDialog(jFrame, ex.getMessage());
+                                log.error(ex.getMessage(), ex);
+                                throw new RuntimeException(ex);
+                            }
+
+                            SwingUtilities.invokeLater(() -> {
+                                currentTreeNode.setTreeEntity(treeEntity);
+                                instance.getDefaultTreeModel().nodeChanged(currentTreeNode);
+                            });
+                        } else {
+                            log.info("重命名未修改名称, 不做任何操作");
                         }
-
-                        currentTreeNode.setTreeEntity(treeEntity);
-                        instance.getDefaultTreeModel().nodeChanged(currentTreeNode);
-                    } else {
-                        log.info("重命名未修改名称, 不做任何操作");
                     }
                 }
-            }
+            });
+
         }
     }
 }

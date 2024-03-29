@@ -27,6 +27,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author lsl
@@ -202,44 +203,49 @@ public class LeftTree {
     public static class NewFolderAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            LeftTree instance = getInstance();
-            TreePath selectionPath = instance.getCurrentTreePath();
-            LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
+            CompletableFuture.runAsync(() -> {
+                LeftTree instance = getInstance();
+                TreePath selectionPath = instance.getCurrentTreePath();
+                LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
 
-            String result = JOptionPane.showInputDialog(
-                    Main.dsbieJFrame,
-                    "目录名称",
-                    "新建文件夹",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+                String result = JOptionPane.showInputDialog(
+                        Main.dsbieJFrame,
+                        "目录名称",
+                        "新建文件夹",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
 
-            if (StringUtil.isNotBlank(result)) {
-                log.info("新建文件夹: {}", result);
+                if (StringUtil.isNotBlank(result)) {
+                    log.info("新建文件夹: {}", result);
 
-                TreeEntity treeEntity = new TreeEntity();
-                treeEntity.setId(KToolsContext.getInstance().getIdGenerator().getId(UidKey.TREE));
-                treeEntity.setParentNodeId(currentTreeNode.getTreeEntity().getId());
-                treeEntity.setNodeName(result);
-                treeEntity.setNodeType(LeftTreeNodeType.FOLDER);
-                treeEntity.setNodeComment(null);
-                treeEntity.setChild(null);
+                    TreeEntity treeEntity = new TreeEntity();
+                    treeEntity.setId(KToolsContext.getInstance().getIdGenerator().getId(UidKey.TREE));
+                    treeEntity.setParentNodeId(currentTreeNode.getTreeEntity().getId());
+                    treeEntity.setNodeName(result);
+                    treeEntity.setNodeType(LeftTreeNodeType.FOLDER);
+                    treeEntity.setNodeComment(null);
+                    treeEntity.setChild(null);
 
-                List<String> nodePathList = new ArrayList<>();
-                instance.buildTreeNodePath(nodePathList, selectionPath);
-                treeEntity.setNodePath(instance.getNodePathString(nodePathList));
+                    List<String> nodePathList = new ArrayList<>();
+                    instance.buildTreeNodePath(nodePathList, selectionPath);
+                    treeEntity.setNodePath(instance.getNodePathString(nodePathList));
 
-                try {
-                    KToolsContext.getInstance().getApi(SystemApi.class).addNode(treeEntity);
-                } catch (KToolException ex) {
-                    DialogUtil.showErrorDialog(Main.dsbieJFrame, ex.getMessage());
-                    throw new RuntimeException(ex);
+                    try {
+                        KToolsContext.getInstance().getApi(SystemApi.class).addNode(treeEntity);
+                    } catch (KToolException ex) {
+                        DialogUtil.showErrorDialog(Main.dsbieJFrame, ex.getMessage());
+                        log.error(ex.getMessage(), ex);
+                        throw new RuntimeException(ex);
+                    }
+
+                    LeftTreeNode treeNode = new LeftTreeNode(treeEntity);
+                    DefaultTreeModel model = (DefaultTreeModel) instance.getTreeModel();
+                    SwingUtilities.invokeLater(() -> {
+                        model.insertNodeInto(treeNode, currentTreeNode, currentTreeNode.getChildCount());
+                        instance.expandTreeNode(selectionPath);
+                    });
                 }
-
-                LeftTreeNode treeNode = new LeftTreeNode(treeEntity);
-                DefaultTreeModel model = (DefaultTreeModel) instance.getTreeModel();
-                model.insertNodeInto(treeNode, currentTreeNode, currentTreeNode.getChildCount());
-                instance.expandTreeNode(selectionPath);
-            }
+            });
         }
     }
 }

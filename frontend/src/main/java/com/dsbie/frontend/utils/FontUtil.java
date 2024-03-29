@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author lsl
@@ -40,13 +42,18 @@ public class FontUtil {
     }
 
     public static void initUIFont() {
-        Properties properties = KToolsContext.getInstance().getProperties();
-        String fontName = String.valueOf(properties.get("font.name"));
-        int fontSize = Integer.parseInt(String.valueOf(properties.get("font.size")));
-        String fontStyle = String.valueOf(properties.get("font.style"));
-        log.info("初始化界面字体: {} {} {}", fontName, fontSize, fontStyle);
-        UIManager.put("defaultFont", new Font(fontName, FontUtil.getFontStyle(fontStyle), fontSize));
+        try {
+            CompletableFuture.runAsync(() -> {
+                Properties properties = KToolsContext.getInstance().getProperties();
+                String fontName = String.valueOf(properties.get("font.name"));
+                int fontSize = Integer.parseInt(String.valueOf(properties.get("font.size")));
+                String fontStyle = String.valueOf(properties.get("font.style"));
+                log.info("初始化界面字体: {} {} {}", fontName, fontSize, fontStyle);
+                UIManager.put("defaultFont", new Font(fontName, FontUtil.getFontStyle(fontStyle), fontSize));
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
-
 
 }
