@@ -54,7 +54,7 @@ public class FontUtil {
                 String fontStyle = String.valueOf(properties.get("font.style"));
                 log.info("初始化界面字体: {} {} {}", fontName, fontSize, fontStyle);
                 UIManager.put("defaultFont", new Font(fontName, FontUtil.getFontStyle(fontStyle), fontSize));
-            }, FrontendThreadPool.getInstance().getExecutorService()).get();
+            },  KToolsContext.getInstance().getTaskManager().getExecutorService()).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

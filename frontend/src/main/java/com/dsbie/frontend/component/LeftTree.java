@@ -246,7 +246,7 @@ public class LeftTree {
                         instance.expandTreeNode(selectionPath);
                     });
                 }
-            }, FrontendThreadPool.getInstance().getExecutorService());
+            },  KToolsContext.getInstance().getTaskManager().getExecutorService());
         }
     }
 }

@@ -90,7 +90,7 @@ public class FrameJPopupMenu {
                         });
                     }
                 }
-            }, FrontendThreadPool.getInstance().getExecutorService());
+            }, KToolsContext.getInstance().getTaskManager().getExecutorService());
 
         }
     }
@@ -145,7 +145,7 @@ public class FrameJPopupMenu {
                         }
                     }
                 }
-            }, FrontendThreadPool.getInstance().getExecutorService());
+            },  KToolsContext.getInstance().getTaskManager().getExecutorService());
 
         }
     }

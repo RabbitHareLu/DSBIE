@@ -72,7 +72,7 @@ public class DsbieJFrame extends JFrame {
                 validate();
             });
 
-        }, FrontendThreadPool.getInstance().getExecutorService());
+        },  KToolsContext.getInstance().getTaskManager().getExecutorService());
     }
 
 
@@ -156,7 +156,7 @@ public class DsbieJFrame extends JFrame {
                 add(jMenuBar, BorderLayout.NORTH);
                 validate();
             });
-        }, FrontendThreadPool.getInstance().getExecutorService());
+        },  KToolsContext.getInstance().getTaskManager().getExecutorService());
     }
 
     private void initFontMenu(JMenu fontNameMenu, JMenu fontSizeMenu, JMenu fontStyleMenu) {
@@ -184,7 +184,7 @@ public class DsbieJFrame extends JFrame {
 
                 log.info("修改字体名称为: {}", newFontName);
                 SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(newFontName, FontUtil.getFontStyle(fontStyle1), fontSize1)));
-            }, FrontendThreadPool.getInstance().getExecutorService()));
+            },  KToolsContext.getInstance().getTaskManager().getExecutorService()));
 
             fontNameGroup.add(jCheckBoxMenuItem);
             fontNameMenu.add(jCheckBoxMenuItem);
@@ -209,7 +209,7 @@ public class DsbieJFrame extends JFrame {
 
                 log.info("修改字体大小为: {}", newFontSize);
                 SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(fontName1, FontUtil.getFontStyle(fontStyle12), newFontSize)));
-            }, FrontendThreadPool.getInstance().getExecutorService()));
+            },  KToolsContext.getInstance().getTaskManager().getExecutorService()));
             fontSizeGroup.add(jCheckBoxMenuItem);
             fontSizeMenu.add(jCheckBoxMenuItem);
         }
@@ -233,7 +233,7 @@ public class DsbieJFrame extends JFrame {
 
                 log.info("修改字体样式为: {}", newFontStyle);
                 SwingUtilities.invokeLater(() -> FontUtil.updateUIFont(new Font(fontName12, FontUtil.getFontStyle(newFontStyle), fontSize12)));
-            }, FrontendThreadPool.getInstance().getExecutorService()));
+            },  KToolsContext.getInstance().getTaskManager().getExecutorService()));
             fontStyleGroup.add(jCheckBoxMenuItem);
             fontStyleMenu.add(jCheckBoxMenuItem);
         }

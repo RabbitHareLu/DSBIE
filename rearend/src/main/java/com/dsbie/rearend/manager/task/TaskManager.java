@@ -1,5 +1,6 @@
 package com.dsbie.rearend.manager.task;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.concurrent.*;
  * @author WCG
  */
 @Slf4j
+@Data
 public class TaskManager {
 
     private final ExecutorService executorService;
