@@ -1,5 +1,6 @@
 package com.dsbie.frontend.utils;
 
+import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.rearend.KToolsContext;
 import com.formdev.flatlaf.FlatLaf;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,8 @@ public class FontUtil {
     public static void updateUIFont(Font newFont) {
         UIManager.put("defaultFont", newFont);
         FlatLaf.updateUI();
+        SwingUtilities.updateComponentTreeUI(FrameJPopupMenu.getInstance().getRootPopupMenu());
+        SwingUtilities.updateComponentTreeUI(FrameJPopupMenu.getInstance().getFolderPopupMenu());
     }
 
     public static int getFontStyle(String fontStyle) {
