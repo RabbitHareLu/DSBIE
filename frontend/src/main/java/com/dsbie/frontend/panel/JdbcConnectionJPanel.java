@@ -12,6 +12,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,6 +40,9 @@ public class JdbcConnectionJPanel extends JPanel {
     private JTextField usernameInputField;
     private JPasswordField passwordInputField;
     private JTextField urlInputField;
+
+    private JTable table;
+    private DefaultTableModel defaultTableModel;
 
     private JTabbedPane tabbedPane;
     private RegularJPanel regularJPanel;
@@ -276,7 +281,47 @@ public class JdbcConnectionJPanel extends JPanel {
     private class AdvancedJPanel extends JPanel {
 
         public AdvancedJPanel() {
+            setLayout(new BorderLayout());
+            JScrollPane tableJScrollPane = new JScrollPane();
+            table = new JTable();
+            defaultTableModel = new DefaultTableModel(new Object[][]{
+                    {"item 1", "item 1b"},
+                    {"item 2", "item 2b"},
+            },
+                    new String[]{
+                            "Key", "Value"
+                    }) {
+                Class<?>[] columnTypes = {
+                        String.class, String.class
+                };
 
+                boolean[] columnEditable = {
+                        true, true
+                };
+
+                @Override
+                public Class<?> getColumnClass(int columnIndex) {
+                    return columnTypes[columnIndex];
+                }
+
+                @Override
+                public boolean isCellEditable(int rowIndex, int columnIndex) {
+                    return columnEditable[columnIndex];
+                }
+
+            };
+            table.setModel(defaultTableModel);
+            TableColumnModel columnModel = table.getColumnModel();
+            columnModel.getColumn(0).setCellEditor(new DefaultCellEditor(
+                    new JComboBox(new DefaultComboBoxModel(new String[]{
+                            "BatchCount",
+                            "BatchCount2",
+                    }))));
+
+            ((JComboBox) ((DefaultCellEditor) table.getColumnModel().getColumn(0).getCellEditor()).getComponent())
+                    .setEditable(true);
+            tableJScrollPane.setViewportView(table);
+            add(tableJScrollPane);
         }
     }
 }

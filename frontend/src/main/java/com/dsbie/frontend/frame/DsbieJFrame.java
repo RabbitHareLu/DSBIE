@@ -150,8 +150,8 @@ public class DsbieJFrame extends JFrame {
             newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
             JMenuItem about = new JMenuItem("关于");
             about.setIcon(ImageLoadUtil.getInstance().getAboutIcon());
-            newMenu.add(newFolder);
             newMenu.add(newJDBCConnection);
+            newMenu.add(newFolder);
             helpMenu.add(about);
 
             setAboutAction(about);

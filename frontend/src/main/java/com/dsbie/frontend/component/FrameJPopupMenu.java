@@ -118,7 +118,11 @@ public class FrameJPopupMenu {
                 if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.ROOT)) {
                     DialogUtil.showErrorDialog(Main.dsbieJFrame, "请先选中一个节点进行编辑!");
                     log.error("不允许重命名Root节点");
-                    throw new RuntimeException("不允许重命名Root节点");
+                    try {
+                        throw new KToolException("不允许重命名Root节点");
+                    } catch (KToolException ex) {
+                        throw new RuntimeException(ex.getMessage(), ex);
+                    }
                 }
 
                 String oldNodeName = currentTreeNode.getTreeEntity().getNodeName();
