@@ -6,6 +6,7 @@ import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
+import com.formdev.flatlaf.FlatClientProperties;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,15 +34,23 @@ import static com.formdev.flatlaf.FlatClientProperties.*;
 public class JdbcConnectionJPanel extends JPanel {
     private JTextField nameInputField;
     private JTextField commentInputField;
+    private JTextField driverInputField;
+    private JTextField usernameInputField;
+    private JPasswordField passwordInputField;
+    private JTextField urlInputField;
+
     private JTabbedPane tabbedPane;
     private RegularJPanel regularJPanel;
     private AdvancedJPanel advancedJPanel;
+
+    private TreeEntity treeEntity;
 
     public JdbcConnectionJPanel() {
 
     }
 
     public JdbcConnectionJPanel(TreeEntity treeEntity) {
+        this.treeEntity = treeEntity;
         setLayout(new BorderLayout());
         Box northBox = null;
         Box centerBox = null;
@@ -100,8 +109,8 @@ public class JdbcConnectionJPanel extends JPanel {
     private Box initCenterBox(TreeEntity treeEntity) {
         Box box = Box.createHorizontalBox();
         box.add(Box.createHorizontalStrut(100));
-        regularJPanel = new RegularJPanel(treeEntity);
-        advancedJPanel = new AdvancedJPanel(treeEntity);
+        regularJPanel = new RegularJPanel();
+        advancedJPanel = new AdvancedJPanel();
         tabbedPane = new JTabbedPane();
         tabbedPane.addTab("常规", null, regularJPanel, "常规");
         tabbedPane.addTab("高级", null, advancedJPanel, "高级");
@@ -203,10 +212,61 @@ public class JdbcConnectionJPanel extends JPanel {
     private class RegularJPanel extends JPanel {
 
         public RegularJPanel() {
-        }
+            setLayout(new BorderLayout());
+            Box verticalBox = Box.createVerticalBox();
+            verticalBox.add(Box.createVerticalStrut(30));
 
-        public RegularJPanel(TreeEntity treeEntity) {
+            Box driverBox = Box.createHorizontalBox();
+            JLabel driverLabel = new JLabel("驱动: ");
+            driverBox.add(driverLabel);
+            driverBox.add(Box.createHorizontalStrut(30));
+            driverInputField = new JTextField();
+            driverInputField.putClientProperty("JTextField.placeholderText", "com.mysql.cj.jdbc.driver");
+            driverInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+            driverBox.add(driverInputField);
 
+            Dimension dimension = driverLabel.getPreferredSize();
+            double fixedWidth = 80;
+            double height = dimension.getHeight();
+            dimension.setSize(fixedWidth, height);
+            driverLabel.setPreferredSize(dimension);
+
+            Box usernameBox = Box.createHorizontalBox();
+            JLabel usernameLabel = new JLabel("用户名: ");
+            usernameBox.add(usernameLabel);
+            usernameBox.add(Box.createHorizontalStrut(30));
+            usernameInputField = new JTextField();
+            usernameInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+            usernameBox.add(usernameInputField);
+            usernameLabel.setPreferredSize(dimension);
+
+            Box passwordBox = Box.createHorizontalBox();
+            JLabel passwordLabel = new JLabel("密码: ");
+            passwordBox.add(passwordLabel);
+            passwordBox.add(Box.createHorizontalStrut(30));
+            passwordInputField = new JPasswordField();
+            passwordInputField.putClientProperty(FlatClientProperties.STYLE, "showRevealButton: true");
+            passwordBox.add(passwordInputField);
+            passwordLabel.setPreferredSize(dimension);
+
+            Box urlBox = Box.createHorizontalBox();
+            JLabel urlLabel = new JLabel("URL: ");
+            urlBox.add(urlLabel);
+            urlBox.add(Box.createHorizontalStrut(30));
+            urlInputField = new JPasswordField();
+            urlInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+            urlBox.add(urlInputField);
+            urlLabel.setPreferredSize(dimension);
+
+            verticalBox.add(driverBox);
+            verticalBox.add(Box.createVerticalStrut(30));
+            verticalBox.add(usernameBox);
+            verticalBox.add(Box.createVerticalStrut(30));
+            verticalBox.add(passwordBox);
+            verticalBox.add(Box.createVerticalStrut(30));
+            verticalBox.add(urlBox);
+
+            add(verticalBox, BorderLayout.NORTH);
         }
 
     }
@@ -216,10 +276,6 @@ public class JdbcConnectionJPanel extends JPanel {
     private class AdvancedJPanel extends JPanel {
 
         public AdvancedJPanel() {
-
-        }
-
-        public AdvancedJPanel(TreeEntity treeEntity) {
 
         }
     }
