@@ -5,6 +5,7 @@ import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
+import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 import com.formdev.flatlaf.FlatClientProperties;
 import lombok.Getter;
@@ -89,6 +90,7 @@ public class JdbcConnectionJPanel extends JPanel {
 
         nameInputField = new JTextField();
         nameInputField.setText(name);
+        nameInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         box.add(nameInputField);
 
         box.add(Box.createHorizontalStrut(50));
@@ -101,6 +103,7 @@ public class JdbcConnectionJPanel extends JPanel {
 
         commentInputField = new JTextField(comment);
         commentInputField.setText(comment);
+        commentInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         box.add(commentInputField);
 
         box.add(Box.createHorizontalStrut(100));
@@ -251,6 +254,7 @@ public class JdbcConnectionJPanel extends JPanel {
             passwordBox.add(Box.createHorizontalStrut(30));
             passwordInputField = new JPasswordField();
             passwordInputField.putClientProperty(FlatClientProperties.STYLE, "showRevealButton: true");
+            passwordInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
             passwordBox.add(passwordInputField);
             passwordLabel.setPreferredSize(dimension);
 
@@ -258,7 +262,7 @@ public class JdbcConnectionJPanel extends JPanel {
             JLabel urlLabel = new JLabel("URL: ");
             urlBox.add(urlLabel);
             urlBox.add(Box.createHorizontalStrut(30));
-            urlInputField = new JPasswordField();
+            urlInputField = new JTextField();
             urlInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
             urlBox.add(urlInputField);
             urlLabel.setPreferredSize(dimension);
@@ -282,12 +286,11 @@ public class JdbcConnectionJPanel extends JPanel {
 
         public AdvancedJPanel() {
             setLayout(new BorderLayout());
+            Box horizontalBox = Box.createHorizontalBox();
+
             JScrollPane tableJScrollPane = new JScrollPane();
             table = new JTable();
-            defaultTableModel = new DefaultTableModel(new Object[][]{
-                    {"item 1", "item 1b"},
-                    {"item 2", "item 2b"},
-            },
+            defaultTableModel = new DefaultTableModel(null,
                     new String[]{
                             "Key", "Value"
                     }) {
@@ -310,6 +313,7 @@ public class JdbcConnectionJPanel extends JPanel {
                 }
 
             };
+
             table.setModel(defaultTableModel);
             TableColumnModel columnModel = table.getColumnModel();
             columnModel.getColumn(0).setCellEditor(new DefaultCellEditor(
@@ -320,8 +324,30 @@ public class JdbcConnectionJPanel extends JPanel {
 
             ((JComboBox) ((DefaultCellEditor) table.getColumnModel().getColumn(0).getCellEditor()).getComponent())
                     .setEditable(true);
+            table.setShowHorizontalLines(true);
+            table.setShowVerticalLines(true);
             tableJScrollPane.setViewportView(table);
-            add(tableJScrollPane);
+            horizontalBox.add(tableJScrollPane);
+
+            JToolBar toolBar = new JToolBar();
+            toolBar.setOrientation(SwingConstants.VERTICAL);
+            JButton addButton = new JButton();
+            addButton.setIcon(ImageLoadUtil.getInstance().getAddRowIcon());
+            addButton.addActionListener(e -> CompletableFutureUtil.submit(() -> SwingUtilities.invokeLater(() -> defaultTableModel.addRow(new String[]{}))));
+            toolBar.add(addButton);
+            JButton deleteButton = new JButton();
+            deleteButton.setIcon(ImageLoadUtil.getInstance().getDeleteRowIcon());
+            deleteButton.addActionListener(e -> CompletableFutureUtil.submit(() -> {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    SwingUtilities.invokeLater(() -> defaultTableModel.removeRow(selectedRow));
+                }
+            }));
+            toolBar.add(deleteButton);
+            toolBar.add(Box.createVerticalGlue());
+            horizontalBox.add(toolBar);
+
+            add(horizontalBox);
         }
     }
 }
