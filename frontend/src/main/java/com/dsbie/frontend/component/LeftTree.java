@@ -21,6 +21,9 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -50,11 +53,14 @@ public class LeftTree {
         defaultTreeModel = new DefaultTreeModel(root);
 
         jTree = new JTree(defaultTreeModel);
+        jTree.setDragEnabled(true);
+        jTree.setDropMode(DropMode.ON_OR_INSERT);
         jTree.setShowsRootHandles(true);
         jTree.setCellRenderer(new TreeNodeRenderer());
         jTree.setRootVisible(false);
 //        jTree.setToggleClickCount(0);
         jTree.addMouseListener(new TreeMouseAdapter());
+        jTree.setTransferHandler(new DummyTransferHandler());
     }
 
     public static LeftTree getInstance() {
@@ -257,6 +263,40 @@ public class LeftTree {
                     });
                 }
             });
+        }
+    }
+
+    private static class DummyTransferHandler
+            extends TransferHandler {
+        @Override
+        protected Transferable createTransferable(JComponent c) {
+            if (c instanceof JList && ((JList<?>) c).isSelectionEmpty())
+                return null;
+            if (c instanceof JTree && ((JTree) c).isSelectionEmpty())
+                return null;
+            if (c instanceof JTable && ((JTable) c).getSelectionModel().isSelectionEmpty())
+                return null;
+
+            return new StringSelection("dummy");
+        }
+
+        @Override
+        public int getSourceActions(JComponent c) {
+            return COPY;
+        }
+
+        @Override
+        public boolean canImport(TransferSupport support) {
+            return support.isDataFlavorSupported(DataFlavor.stringFlavor);
+        }
+
+        @Override
+        public boolean importData(TransferSupport support) {
+            String message = String.valueOf(support.getDropLocation());
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(null, message, "Drop", JOptionPane.PLAIN_MESSAGE);
+            });
+            return false;
         }
     }
 }

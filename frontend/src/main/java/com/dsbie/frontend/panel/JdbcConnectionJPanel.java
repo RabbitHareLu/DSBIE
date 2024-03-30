@@ -288,9 +288,12 @@ public class JdbcConnectionJPanel extends JPanel {
             setLayout(new BorderLayout());
             Box horizontalBox = Box.createHorizontalBox();
 
+            String[][] data = {
+                    {"BatchCount", "1000"}
+            };
             JScrollPane tableJScrollPane = new JScrollPane();
             table = new JTable();
-            defaultTableModel = new DefaultTableModel(null,
+            defaultTableModel = new DefaultTableModel(data,
                     new String[]{
                             "Key", "Value"
                     }) {

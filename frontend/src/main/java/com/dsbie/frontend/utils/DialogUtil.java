@@ -11,11 +11,11 @@ import java.awt.*;
 public class DialogUtil {
 
     public static void showErrorDialog(Component parentComponent, Object message) {
-        JOptionPane.showMessageDialog(
+        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
                 parentComponent,
                 message,
                 "Error",
                 JOptionPane.ERROR_MESSAGE
-        );
+        ));
     }
 }
