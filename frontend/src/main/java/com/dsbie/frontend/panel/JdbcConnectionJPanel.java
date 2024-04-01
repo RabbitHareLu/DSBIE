@@ -14,6 +14,8 @@ import com.dsbie.rearend.api.DataSourceApi;
 import com.dsbie.rearend.api.SystemApi;
 import com.dsbie.rearend.common.utils.StringUtil;
 import com.dsbie.rearend.exception.KToolException;
+import com.dsbie.rearend.manager.datasource.model.KDataSourceConfig;
+import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
 import com.dsbie.rearend.manager.uid.UidKey;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -35,6 +37,7 @@ import java.io.Serial;
 import java.util.List;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
 
@@ -50,7 +53,6 @@ import static com.formdev.flatlaf.FlatClientProperties.*;
 public class JdbcConnectionJPanel extends JPanel {
     private JTextField nameInputField;
     private JTextField commentInputField;
-    private JTextField driverInputField;
     private JTextField usernameInputField;
     private JPasswordField passwordInputField;
     private JTextField urlInputField;
@@ -58,6 +60,8 @@ public class JdbcConnectionJPanel extends JPanel {
 
     private JTable table;
     private DefaultTableModel defaultTableModel;
+
+    private Map<String, KDataSourceMetadata> supportJdbcMap;
 
     private JTabbedPane tabbedPane;
     private RegularJPanel regularJPanel;
@@ -76,6 +80,7 @@ public class JdbcConnectionJPanel extends JPanel {
         this.leftTreeNode = leftTreeNode;
         this.treeEntity = leftTreeNode.getTreeEntity();
         this.isNew = isNew;
+        this.supportJdbcMap = KToolsContext.getInstance().getApi(DataSourceApi.class).getAllMetadata("JDBC");
         setLayout(new BorderLayout());
 
         Box northBox = initNorthBox();
@@ -168,13 +173,10 @@ public class JdbcConnectionJPanel extends JPanel {
             if (table.isEditing()) {
                 table.getCellEditor().stopCellEditing();
             }
-
             if (StringUtil.isBlank(nameInputField.getText())) {
                 throw new KToolException("名称不能为空");
             }
-            if (StringUtil.isBlank(urlInputField.getText())) {
-                throw new KToolException("URL不能为空");
-            }
+            Map<String, String> nodeInfoMap = getNodeInfo();
 
             LeftTree instance = LeftTree.getInstance();
             if (isNew) {
@@ -193,8 +195,6 @@ public class JdbcConnectionJPanel extends JPanel {
                     List<String> nodePathList = new ArrayList<>();
                     instance.buildTreeNodePath(nodePathList, selectionPath);
                     treeEntity1.setNodePath(instance.getNodePathString(nodePathList));
-
-                    Map<String, String> nodeInfoMap = getNodeInfo();
                     treeEntity1.setNodeInfo(nodeInfoMap);
 
                     treeEntity1.setChild(null);
@@ -220,7 +220,6 @@ public class JdbcConnectionJPanel extends JPanel {
                 if (instance.isNodeDescendant(leftTreeNode)) {
                     treeEntity.setNodeName(nameInputField.getText());
                     treeEntity.setNodeComment(commentInputField.getText());
-                    Map<String, String> nodeInfoMap = getNodeInfo();
                     treeEntity.setNodeInfo(nodeInfoMap);
                     KToolsContext.getInstance().getApi(SystemApi.class).updateNode(treeEntity);
                     SwingUtilities.invokeLater(() -> {
@@ -261,11 +260,32 @@ public class JdbcConnectionJPanel extends JPanel {
 
 
     private Map<String, String> getNodeInfo() {
+        String itemAt = dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex());
+        Map<String, KDataSourceConfig> collect = supportJdbcMap.get(itemAt).getConfig().stream().collect(Collectors.toMap(KDataSourceConfig::getKey, n -> n, (k1, k2) -> k1));
+
         Map<String, String> nodeInfoMap = new LinkedHashMap<>();
-        nodeInfoMap.put("dbType", dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex()));
-        nodeInfoMap.put("driver", StringUtil.isBlank(driverInputField.getText()) ? (String) driverInputField.getClientProperty("JTextField.placeholderText") : driverInputField.getText());
+        nodeInfoMap.put("dbType", itemAt);
+
+        if (collect.get("username").isMust()) {
+            if (StringUtil.isBlank(usernameInputField.getText())) {
+                throw new KToolException("用户名不能为空!");
+            }
+        }
         nodeInfoMap.put("username", usernameInputField.getText());
-        nodeInfoMap.put("password", new String(passwordInputField.getPassword()));
+
+        String s = new String(passwordInputField.getPassword());
+        if (collect.get("password").isMust()) {
+            if (StringUtil.isBlank(s)) {
+                throw new KToolException("密码不能为空!");
+            }
+        }
+        nodeInfoMap.put("password", s);
+
+        if (collect.get("jdbcUrl").isMust()) {
+            if (StringUtil.isBlank(urlInputField.getText())) {
+                throw new KToolException("url不能为空!");
+            }
+        }
         nodeInfoMap.put("jdbcUrl", urlInputField.getText());
 
         for (int row = 0; row < table.getRowCount(); row++) {
@@ -279,6 +299,11 @@ public class JdbcConnectionJPanel extends JPanel {
                 }
             }
             if (StringUtil.isNotBlank(key)) {
+                if (collect.get(key).isMust()) {
+                    if (StringUtil.isBlank(value)) {
+                        throw new KToolException(key + "不能为空");
+                    }
+                }
                 nodeInfoMap.put(key, value);
             }
         }
@@ -374,18 +399,42 @@ public class JdbcConnectionJPanel extends JPanel {
             dbTypeComboBox = new JComboBox<>();
 
             Vector<String> typeVector = new Vector<>();
-            typeVector.add("Mysql");
-            typeVector.add("Oracle");
+            for (Map.Entry<String, KDataSourceMetadata> stringKDataSourceMetadataEntry : supportJdbcMap.entrySet()) {
+                typeVector.add(stringKDataSourceMetadataEntry.getKey());
+            }
+
             dbTypeComboBox.setModel(new DefaultComboBoxModel<>(typeVector));
+
             dbTypeComboBox.addActionListener(e -> {
-                String itemAt = dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex());
-                if (Objects.equals(itemAt, "Mysql")) {
-                    driverInputField.putClientProperty("JTextField.placeholderText", "com.mysql.cj.jdbc.driver");
-                } else if (Objects.equals(itemAt, "Oracle")) {
-                    driverInputField.putClientProperty("JTextField.placeholderText", "oracle.jdbc.OracleDriver");
-                }
+                CompletableFutureUtil.submit(() -> {
+                    Vector<String> columnNames = new Vector<>();
+                    columnNames.add("Key");
+                    columnNames.add("Value");
+
+                    Vector<Vector<String>> data = new Vector<>();
+                    KDataSourceMetadata kDataSourceMetadata = supportJdbcMap.get(dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex()));
+
+                    //  必填项直接放进table中
+                    List<KDataSourceConfig> mustList = kDataSourceMetadata.getConfig().stream()
+                            .filter(
+                                    kDataSourceConfig -> !Objects.equals(kDataSourceConfig.getKey(), "username") &&
+                                            !Objects.equals(kDataSourceConfig.getKey(), "password") &&
+                                            !Objects.equals(kDataSourceConfig.getKey(), "jdbcUrl"))
+                            .filter(KDataSourceConfig::isMust).toList();
+                    for (KDataSourceConfig kDataSourceConfig : mustList) {
+                        Vector<String> strings = new Vector<>();
+                        strings.add(kDataSourceConfig.getKey());
+                        strings.add(kDataSourceConfig.getDefaultValue());
+                        data.add(strings);
+                    }
+
+                    SwingUtilities.invokeLater(() -> defaultTableModel.setDataVector(data, columnNames));
+
+                    // 设置key列下拉框的值
+                    initKeyJComboBox();
+                });
             });
-            dbTypeComboBox.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+
             dbTypeBox.add(dbTypeComboBox);
 
             Dimension dimension = dbTypeLabel.getPreferredSize();
@@ -393,16 +442,6 @@ public class JdbcConnectionJPanel extends JPanel {
             double height = dimension.getHeight();
             dimension.setSize(fixedWidth, height);
             dbTypeLabel.setPreferredSize(dimension);
-
-            Box driverBox = Box.createHorizontalBox();
-            JLabel driverLabel = new JLabel("驱动: ");
-            driverBox.add(driverLabel);
-            driverBox.add(Box.createHorizontalStrut(30));
-            driverInputField = new JTextField();
-            driverInputField.putClientProperty("JTextField.placeholderText", "com.mysql.cj.jdbc.driver");
-            driverInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-            driverBox.add(driverInputField);
-            driverLabel.setPreferredSize(dimension);
 
             Box usernameBox = Box.createHorizontalBox();
             JLabel usernameLabel = new JLabel("用户名: ");
@@ -435,18 +474,36 @@ public class JdbcConnectionJPanel extends JPanel {
 
             verticalBox.add(dbTypeBox);
             verticalBox.add(Box.createVerticalStrut(30));
-            verticalBox.add(driverBox);
-            verticalBox.add(Box.createVerticalStrut(30));
             verticalBox.add(usernameBox);
             verticalBox.add(Box.createVerticalStrut(30));
             verticalBox.add(passwordBox);
             verticalBox.add(Box.createVerticalStrut(30));
             verticalBox.add(urlBox);
 
+            // 添加输入框的符号校验
+            KDataSourceMetadata kDataSourceMetadata = supportJdbcMap.get(dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex()));
+            if (Objects.nonNull(kDataSourceMetadata)) {
+                List<KDataSourceConfig> config = kDataSourceMetadata.getConfig();
+                Map<String, KDataSourceConfig> collect = config.stream().collect(Collectors.toMap(KDataSourceConfig::getKey, n -> n, (k1, k2) -> k1));
+                KDataSourceConfig username = collect.get("username");
+                if (username.isMust()) {
+                    ComponentVerifierUtil.notBlank(usernameInputField);
+                }
+                KDataSourceConfig password = collect.get("password");
+                if (password.isMust()) {
+                    ComponentVerifierUtil.notBlank(passwordInputField);
+                }
+                KDataSourceConfig jdbcUrl = collect.get("jdbcUrl");
+                if (jdbcUrl.isMust()) {
+                    ComponentVerifierUtil.notBlank(urlInputField);
+                }
+            }
+
+            // 如果是编辑, 给输入框赋值
             if (!isNew) {
                 Map<String, String> nodeInfo = treeEntity.getNodeInfo();
                 dbTypeComboBox.setSelectedItem(nodeInfo.get("dbType"));
-                driverInputField.setText(nodeInfo.get("driver"));
+                dbTypeComboBox.setEnabled(false);
                 usernameInputField.setText(nodeInfo.get("username"));
                 passwordInputField.setText(nodeInfo.get("password"));
                 urlInputField.setText(nodeInfo.get("jdbcUrl"));
@@ -465,18 +522,33 @@ public class JdbcConnectionJPanel extends JPanel {
             setLayout(new BorderLayout());
             Box horizontalBox = Box.createHorizontalBox();
 
-            Vector<Vector<String>> data = new Vector<>();
+            JScrollPane tableJScrollPane = new JScrollPane();
+            table = new JTable();
+            Vector<String> columnNames = new Vector<>();
+            columnNames.add("Key");
+            columnNames.add("Value");
 
+            Vector<Vector<String>> data = new Vector<>();
             if (isNew) {
-                Vector<String> batchDate = new Vector<>();
-                batchDate.add("batchCount");
-                batchDate.add("1000");
-                data.add(batchDate);
+                KDataSourceMetadata kDataSourceMetadata = supportJdbcMap.get(dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex()));
+
+                //  必填项直接放进table中
+                List<KDataSourceConfig> mustList = kDataSourceMetadata.getConfig().stream()
+                        .filter(
+                                kDataSourceConfig -> !Objects.equals(kDataSourceConfig.getKey(), "username") &&
+                                        !Objects.equals(kDataSourceConfig.getKey(), "password") &&
+                                        !Objects.equals(kDataSourceConfig.getKey(), "jdbcUrl"))
+                        .filter(KDataSourceConfig::isMust).toList();
+                for (KDataSourceConfig kDataSourceConfig : mustList) {
+                    Vector<String> strings = new Vector<>();
+                    strings.add(kDataSourceConfig.getKey());
+                    strings.add(kDataSourceConfig.getDefaultValue());
+                    data.add(strings);
+                }
             } else {
                 Map<String, String> nodeInfo = treeEntity.getNodeInfo();
                 for (Map.Entry<String, String> stringStringEntry : nodeInfo.entrySet()) {
-                    if (!Objects.equals(stringStringEntry.getKey(), "driver") &&
-                            !Objects.equals(stringStringEntry.getKey(), "username") &&
+                    if (!Objects.equals(stringStringEntry.getKey(), "username") &&
                             !Objects.equals(stringStringEntry.getKey(), "password") &&
                             !Objects.equals(stringStringEntry.getKey(), "jdbcUrl") &&
                             !Objects.equals(stringStringEntry.getKey(), "dbType")) {
@@ -487,12 +559,6 @@ public class JdbcConnectionJPanel extends JPanel {
                     }
                 }
             }
-
-            JScrollPane tableJScrollPane = new JScrollPane();
-            table = new JTable();
-            Vector<String> columnNames = new Vector<>();
-            columnNames.add("Key");
-            columnNames.add("Value");
 
             defaultTableModel = new DefaultTableModel(data, columnNames) {
                 @Serial
@@ -519,14 +585,7 @@ public class JdbcConnectionJPanel extends JPanel {
             };
 
             table.setModel(defaultTableModel);
-            TableColumnModel columnModel = table.getColumnModel();
-            columnModel.getColumn(0).setCellEditor(new DefaultCellEditor(
-                    new JComboBox<>(new DefaultComboBoxModel<>(new String[]{
-                            "batchCount",
-                    }))));
-
-            ((JComboBox<?>) ((DefaultCellEditor) table.getColumnModel().getColumn(0).getCellEditor()).getComponent())
-                    .setEditable(true);
+            initKeyJComboBox();
 
             table.setShowHorizontalLines(true);
             table.setShowVerticalLines(true);
@@ -562,5 +621,34 @@ public class JdbcConnectionJPanel extends JPanel {
 
             add(horizontalBox);
         }
+    }
+
+    /**
+     * 设置key列下拉框的值
+     *
+     * @param
+     * @return
+     * @author lsl
+     * @date 2024/4/1 20:27
+     */
+    private void initKeyJComboBox() {
+        TableColumnModel columnModel = table.getColumnModel();
+
+        // key列下拉
+        KDataSourceMetadata kDataSourceMetadata = supportJdbcMap.get(dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex()));
+        Vector<String> comboBoxVector = new Vector<>();
+        for (KDataSourceConfig kDataSourceConfig : kDataSourceMetadata.getConfig()) {
+            if (!Objects.equals(kDataSourceConfig.getKey(), "username") &&
+                    !Objects.equals(kDataSourceConfig.getKey(), "password") &&
+                    !Objects.equals(kDataSourceConfig.getKey(), "jdbcUrl")) {
+                comboBoxVector.add(kDataSourceConfig.getKey());
+            }
+        }
+
+        columnModel.getColumn(0).setCellEditor(new DefaultCellEditor(
+                new JComboBox<>(new DefaultComboBoxModel<>(comboBoxVector))));
+
+        ((JComboBox<?>) ((DefaultCellEditor) table.getColumnModel().getColumn(0).getCellEditor()).getComponent())
+                .setEditable(true);
     }
 }
