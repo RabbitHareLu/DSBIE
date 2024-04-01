@@ -28,6 +28,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -290,6 +291,9 @@ public class LeftTree {
 
     private static class DummyTransferHandler
             extends TransferHandler {
+        @Serial
+        private static final long serialVersionUID = -2940564469811926228L;
+
         @Override
         protected Transferable createTransferable(JComponent c) {
             if (c instanceof JList && ((JList<?>) c).isSelectionEmpty())

@@ -172,7 +172,10 @@ public class JdbcConnectionJPanel extends JPanel {
         okButton.setBackground(new Color(53, 116, 240));
         okButton.addActionListener(e -> CompletableFutureUtil.submit(() -> {
             if (table.isEditing()) {
-                table.getCellEditor().stopCellEditing();
+                int editingRow = table.getEditingRow();
+                if (table.getRowCount() > editingRow) {
+                    table.getCellEditor().stopCellEditing();
+                }
             }
             if (StringUtil.isBlank(nameInputField.getText())) {
                 throw new KToolException("名称不能为空");
@@ -607,14 +610,20 @@ public class JdbcConnectionJPanel extends JPanel {
             toolBar.setOrientation(SwingConstants.VERTICAL);
             JButton addButton = new JButton();
             addButton.setIcon(ImageLoadUtil.getInstance().getAddRowIcon());
-            addButton.addActionListener(e -> CompletableFutureUtil.submit(() -> SwingUtilities.invokeLater(() -> defaultTableModel.addRow(new String[]{}))));
+            addButton.addActionListener(e -> CompletableFutureUtil.submit(() -> SwingUtilities.invokeLater(() -> {
+                table.getCellEditor().stopCellEditing();
+                defaultTableModel.addRow(new String[]{});
+            })));
             toolBar.add(addButton);
             JButton deleteButton = new JButton();
             deleteButton.setIcon(ImageLoadUtil.getInstance().getDeleteRowIcon());
             deleteButton.addActionListener(e -> CompletableFutureUtil.submit(() -> {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow != -1) {
-                    SwingUtilities.invokeLater(() -> defaultTableModel.removeRow(selectedRow));
+                    SwingUtilities.invokeLater(() -> {
+                        table.getCellEditor().stopCellEditing();
+                        defaultTableModel.removeRow(selectedRow);
+                    });
                 }
             }));
             toolBar.add(deleteButton);
