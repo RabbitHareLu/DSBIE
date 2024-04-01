@@ -20,7 +20,6 @@ public class DataSourceUtil {
         hikariDataSource.setMaximumPoolSize(10);
         hikariDataSource.setMaxLifetime(1800000);
         hikariDataSource.setKeepaliveTime(30000);
-        hikariDataSource.setConnectionTestQuery("SELECT 1");
         hikariDataSource.setIdleTimeout(600000);
         return hikariDataSource;
     }

@@ -14,7 +14,7 @@ public interface DataSourceApi {
     /**
      * 查询所有支持的数据源
      */
-    List<KDataSourceMetadata> getAllMetadata(String name);
+    Map<String, KDataSourceMetadata> getAllMetadata(String name);
 
     /**
      * 查询指定类型的数据源元数据

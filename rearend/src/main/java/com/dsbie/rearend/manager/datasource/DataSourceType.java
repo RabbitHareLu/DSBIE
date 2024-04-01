@@ -6,6 +6,9 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 数据源类型
@@ -23,10 +26,10 @@ public enum DataSourceType {
         this.supportedTypes = new ArrayList<>(List.of(supportedTypes));
     }
 
-    public List<KDataSourceMetadata> getAllMetadata() {
+    public Map<String, KDataSourceMetadata> getAllMetadata() {
         return supportedTypes.stream()
                 .map(Type::getMetadata)
-                .toList();
+                .collect(Collectors.toMap(KDataSourceMetadata::getName, Function.identity()));
     }
 
 }

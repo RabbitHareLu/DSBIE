@@ -7,6 +7,8 @@ import com.dsbie.rearend.manager.datasource.KDataSourceHandler;
 import com.dsbie.rearend.manager.datasource.Type;
 import com.dsbie.rearend.manager.datasource.jdbc.adaper.mysql.MysqlConfig;
 import com.dsbie.rearend.manager.datasource.jdbc.adaper.mysql.MysqlHandler;
+import com.dsbie.rearend.manager.datasource.jdbc.adaper.oracle.OracleConfig;
+import com.dsbie.rearend.manager.datasource.jdbc.adaper.oracle.OracleHandler;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceConfig;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
 
@@ -21,7 +23,8 @@ import java.util.Properties;
  */
 public enum JdbcType implements Type {
 
-    MYSQL(MysqlConfig.class, MysqlHandler.class);
+    MYSQL(MysqlConfig.class, MysqlHandler.class),
+    ORACLE(OracleConfig.class, OracleHandler.class);
 
     private final Class<? extends JdbcConfig> configClass;
 

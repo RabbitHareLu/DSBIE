@@ -18,7 +18,7 @@ import java.util.Properties;
 public class DataSourceService extends BaseService implements DataSourceApi {
 
     @Override
-    public List<KDataSourceMetadata> getAllMetadata(String name) {
+    public Map<String, KDataSourceMetadata> getAllMetadata(String name) {
         return DataSourceType.valueOf(name).getAllMetadata();
     }
 
