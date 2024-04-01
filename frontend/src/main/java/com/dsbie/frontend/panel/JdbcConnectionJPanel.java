@@ -428,8 +428,7 @@ public class JdbcConnectionJPanel extends JPanel {
                         data.add(strings);
                     }
 
-                    SwingUtilities.invokeLater(() -> defaultTableModel.setDataVector(data, columnNames));
-
+                    defaultTableModel.setDataVector(data, columnNames);
                     // 设置key列下拉框的值
                     initKeyJComboBox();
                 });
