@@ -611,7 +611,9 @@ public class JdbcConnectionJPanel extends JPanel {
             JButton addButton = new JButton();
             addButton.setIcon(ImageLoadUtil.getInstance().getAddRowIcon());
             addButton.addActionListener(e -> CompletableFutureUtil.submit(() -> SwingUtilities.invokeLater(() -> {
-                table.getCellEditor().stopCellEditing();
+                if (table.isEditing()) {
+                    table.getCellEditor().stopCellEditing();
+                }
                 defaultTableModel.addRow(new String[]{});
             })));
             toolBar.add(addButton);
@@ -621,7 +623,9 @@ public class JdbcConnectionJPanel extends JPanel {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow != -1) {
                     SwingUtilities.invokeLater(() -> {
-                        table.getCellEditor().stopCellEditing();
+                        if (table.isEditing()) {
+                            table.getCellEditor().stopCellEditing();
+                        }
                         defaultTableModel.removeRow(selectedRow);
                     });
                 }
