@@ -1,8 +1,8 @@
 package com.dsbie.rearend.mybatis.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.dsbie.rearend.common.utils.JsonUtil;
 import com.dsbie.rearend.common.utils.StringUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
@@ -10,7 +10,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -47,7 +47,7 @@ public class NodeInfoHandler implements TypeHandler<Map<String, String>> {
 
     private static Map<String, String> getInfoMap(String json) {
         if (StringUtil.isBlank(json)) {
-            return new HashMap<>();
+            return new LinkedHashMap<>();
         }
         try {
             return JsonUtil.readJsonToMap(json, String.class, String.class);

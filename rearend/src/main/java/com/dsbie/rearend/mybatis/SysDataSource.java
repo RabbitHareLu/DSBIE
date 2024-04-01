@@ -1,4 +1,4 @@
-package com.dsbie.rearend.manager.datasource;
+package com.dsbie.rearend.mybatis;
 
 import com.dsbie.rearend.common.utils.DataSourceUtil;
 import com.dsbie.rearend.manager.datasource.jdbc.JdbcConfig;
@@ -20,13 +20,6 @@ public class SysDataSource {
 
     public static DataSource init() {
         DataSource dataSource = DataSourceUtil.createDataSource(getDataSourceProperties());
-
-        /*MybatisFlexBootstrap bootstrap = MybatisFlexBootstrap.getInstance()
-                .setDataSource(dataSource)
-                .setLogImpl(StdOutImpl.class)
-                .addMapper(PropMapper.class)
-                .addMapper(TreeMapper.class)
-                .start();*/
 
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)

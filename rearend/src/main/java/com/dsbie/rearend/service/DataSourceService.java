@@ -1,10 +1,9 @@
 package com.dsbie.rearend.service;
 
 import com.dsbie.rearend.api.DataSourceApi;
-import com.dsbie.rearend.exception.KToolException;
-import com.dsbie.rearend.manager.datasource.KDataSourceFactory;
+import com.dsbie.rearend.manager.datasource.DataSourceFactory;
+import com.dsbie.rearend.manager.datasource.DataSourceType;
 import com.dsbie.rearend.manager.datasource.KDataSourceHandler;
-import com.dsbie.rearend.manager.datasource.KDataSourceManager;
 import com.dsbie.rearend.manager.datasource.jdbc.model.TableMetadata;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
 
@@ -19,87 +18,67 @@ import java.util.Properties;
 public class DataSourceService extends BaseService implements DataSourceApi {
 
     @Override
-    public List<KDataSourceMetadata> getAllMetadata() {
-        return this.kToolsContext.getDataSourceManager().supportDataSource();
+    public List<KDataSourceMetadata> getAllMetadata(String name) {
+        return DataSourceType.valueOf(name).getAllMetadata();
     }
 
     @Override
-    public KDataSourceMetadata getMetadata(String name) throws KToolException {
-        return this.kToolsContext.getDataSourceManager().getFactory(name).getMetadata();
+    public KDataSourceMetadata getMetadata(String name) {
+        return DataSourceFactory.getMetadata(name);
     }
 
     @Override
-    public void testDataSource(String type, Map<String, String> properties) throws KToolException {
+    public void testDataSource(String type, Map<String, String> properties) {
         // 构建Properties
         Properties datasourceProperties = new Properties();
         datasourceProperties.putAll(properties);
         // 获取数据源处理器
-        KDataSourceFactory sourceFactory = this.kToolsContext.getDataSourceManager().getFactory(type);
-        KDataSourceHandler dataSourceHandler = sourceFactory.createDataSourceHandler(datasourceProperties);
+        KDataSourceHandler dataSourceHandler = DataSourceFactory.createDataSourceHandler(type, datasourceProperties);
         // 测试数据源连接
         dataSourceHandler.testConn();
     }
 
     @Override
-    public void conn(String id, String type, Map<String, String> properties) throws KToolException {
+    public void conn(String id, String type, Map<String, String> properties) {
         // 构建Properties
         Properties datasourceProperties = new Properties();
         datasourceProperties.putAll(properties);
         // 获取数据源处理器
-        KDataSourceManager dataSourceManager = this.kToolsContext.getDataSourceManager();
-        KDataSourceHandler dataSourceHandler;
-        if (dataSourceManager.existHandler(id)) {
-            dataSourceHandler = dataSourceManager.getHandler(id);
-        } else {
-            KDataSourceFactory sourceFactory = this.kToolsContext.getDataSourceManager().getFactory(type);
-            dataSourceHandler = sourceFactory.createDataSourceHandler(datasourceProperties);
-            // 加入管理器
-            this.kToolsContext.getDataSourceManager().addHandler(id, dataSourceHandler);
-        }
+        KDataSourceHandler dataSourceHandler = DataSourceFactory.getDataSourceHandler(id, type, datasourceProperties);
         // 连接数据源
         dataSourceHandler.conn();
     }
 
     @Override
-    public void disConn(String id) throws KToolException {
-        // 获取数据源处理器
-        KDataSourceManager dataSourceManager = this.kToolsContext.getDataSourceManager();
-        if (dataSourceManager.existHandler(id)) {
-            KDataSourceHandler dataSourceHandler = dataSourceManager.getHandler(id);
-            dataSourceHandler.disConn();
-            // 从管理器中移除
-            this.kToolsContext.getDataSourceManager().removeHandler(id);
-        }
+    public void disConn(String id) {
+        DataSourceFactory.removeDataSourceHandler(id);
     }
 
     @Override
-    public List<String> selectAllSchema(String id) throws KToolException {
+    public List<String> selectAllSchema(String id) {
         // 获取数据源处理器
-        KDataSourceManager dataSourceManager = this.kToolsContext.getDataSourceManager();
-        if (dataSourceManager.existHandler(id)) {
-            KDataSourceHandler dataSourceHandler = dataSourceManager.getHandler(id);
+        KDataSourceHandler dataSourceHandler = DataSourceFactory.getDataSourceHandler(id);
+        if (dataSourceHandler != null) {
             return dataSourceHandler.selectAllSchema();
         }
         return new ArrayList<>();
     }
 
     @Override
-    public List<String> selectAllTable(String id, String schema) throws KToolException {
+    public List<String> selectAllTable(String id, String schema) {
         // 获取数据源处理器
-        KDataSourceManager dataSourceManager = this.kToolsContext.getDataSourceManager();
-        if (dataSourceManager.existHandler(id)) {
-            KDataSourceHandler dataSourceHandler = dataSourceManager.getHandler(id);
+        KDataSourceHandler dataSourceHandler = DataSourceFactory.getDataSourceHandler(id);
+        if (dataSourceHandler != null) {
             return dataSourceHandler.selectAllTable(schema);
         }
         return new ArrayList<>();
     }
 
     @Override
-    public TableMetadata selectTableMetadata(String id, String schema, String tableName) throws KToolException {
+    public TableMetadata selectTableMetadata(String id, String schema, String tableName) {
         // 获取数据源处理器
-        KDataSourceManager dataSourceManager = this.kToolsContext.getDataSourceManager();
-        if (dataSourceManager.existHandler(id)) {
-            KDataSourceHandler dataSourceHandler = dataSourceManager.getHandler(id);
+        KDataSourceHandler dataSourceHandler = DataSourceFactory.getDataSourceHandler(id);
+        if (dataSourceHandler != null) {
             return dataSourceHandler.selectTableMetadata(schema, tableName);
         }
         return null;

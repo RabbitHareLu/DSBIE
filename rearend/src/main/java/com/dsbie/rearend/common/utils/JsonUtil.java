@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -25,7 +25,7 @@ public class JsonUtil {
     }
 
     public static <T, E> Map<T, E> readJsonToMap(String json, Class<T> kClass, Class<E> vClass) throws JsonProcessingException {
-        JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(HashMap.class, kClass, vClass);
+        JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(LinkedHashMap.class, kClass, vClass);
         return OBJECT_MAPPER.readValue(json, javaType);
     }
 

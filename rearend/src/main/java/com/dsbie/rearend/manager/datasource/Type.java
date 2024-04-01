@@ -1,16 +1,18 @@
 package com.dsbie.rearend.manager.datasource;
 
-import com.dsbie.rearend.exception.KToolException;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
 
 import java.util.Properties;
 
 /**
- * 数据源工厂
- *
  * @author WCG
  */
-public interface KDataSourceFactory {
+public interface Type {
+
+    /**
+     * 数据源名称
+     */
+    String name();
 
     /**
      * 数据源元数据
@@ -23,6 +25,6 @@ public interface KDataSourceFactory {
      * @param properties 配置消息
      * @return 数据源处理器
      */
-    KDataSourceHandler createDataSourceHandler(Properties properties) throws KToolException;
+    KDataSourceHandler createDataSourceHandler(Properties properties);
 
 }

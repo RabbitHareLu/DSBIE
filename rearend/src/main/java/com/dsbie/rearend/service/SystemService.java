@@ -38,7 +38,7 @@ public class SystemService extends BaseService implements SystemApi {
     }
 
     @Override
-    public void addNode(TreeEntity treeEntity) throws KToolException {
+    public void addNode(TreeEntity treeEntity) {
         // 检查名称是否相同
         checkNodeName(treeEntity);
         // 更新数据库
@@ -46,14 +46,14 @@ public class SystemService extends BaseService implements SystemApi {
     }
 
     @Override
-    public void updateNode(TreeEntity treeEntity) throws KToolException {
+    public void updateNode(TreeEntity treeEntity) {
         // 检查名称是否相同
         checkNodeName(treeEntity);
         // 更新数据库
         this.getMapper(TreeMapper.class).update(treeEntity);
     }
 
-    private void checkNodeName(TreeEntity treeEntity) throws KToolException {
+    private void checkNodeName(TreeEntity treeEntity) {
         String nodePath = treeEntity.getNodePath();
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .where(TreeEntity::getNodePath).eq(nodePath)

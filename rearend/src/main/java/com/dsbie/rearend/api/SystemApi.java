@@ -1,6 +1,5 @@
 package com.dsbie.rearend.api;
 
-import com.dsbie.rearend.exception.KToolException;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 
 import java.util.List;
@@ -12,9 +11,9 @@ public interface SystemApi {
 
     List<TreeEntity> getTree(int nodeId);
 
-    void addNode(TreeEntity treeEntity) throws KToolException;
+    void addNode(TreeEntity treeEntity);
 
-    void updateNode(TreeEntity treeEntity) throws KToolException;
+    void updateNode(TreeEntity treeEntity);
 
     void deleteNode(TreeEntity treeEntity);
 

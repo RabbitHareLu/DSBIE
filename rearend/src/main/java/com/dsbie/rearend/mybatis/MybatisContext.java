@@ -1,7 +1,6 @@
 package com.dsbie.rearend.mybatis;
 
 import com.dsbie.rearend.exception.KToolException;
-import com.dsbie.rearend.manager.datasource.SysDataSource;
 import com.dsbie.rearend.mybatis.entity.PropEntity;
 import com.dsbie.rearend.mybatis.mapper.PropMapper;
 import com.dsbie.rearend.mybatis.mapper.TreeMapper;
@@ -71,7 +70,7 @@ public class MybatisContext {
         return flexDataSource.getDataSourceMap().containsKey(key);
     }
 
-    public DataSource getDataSource(String key) throws KToolException {
+    public DataSource getDataSource(String key) {
         FlexDataSource flexDataSource = FlexGlobalConfig.getDefaultConfig().getDataSource();
         if (!flexDataSource.getDataSourceMap().containsKey(key)) {
             throw new KToolException("数据源不存在！");

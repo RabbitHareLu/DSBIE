@@ -1,4 +1,4 @@
-package com.dsbie.rearend.manager.datasource;
+package com.dsbie.rearend.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

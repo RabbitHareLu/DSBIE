@@ -2,7 +2,7 @@ package com.dsbie.rearend.manager.datasource.jdbc;
 
 
 import com.dsbie.rearend.KToolsContext;
-import com.dsbie.rearend.common.utils.ConfigParamUtil;
+import com.dsbie.rearend.config.ConfigParamUtil;
 import com.dsbie.rearend.common.utils.DataSourceUtil;
 import com.dsbie.rearend.common.utils.StreamUtil;
 import com.dsbie.rearend.exception.KToolException;
@@ -37,6 +37,11 @@ public abstract class AbstractJdbcHandler implements KDataSourceHandler {
         this.jdbcConfig = ConfigParamUtil.buildConfig(properties, JdbcConfig.class);
         this.jdbcConfig.setKey(UUID.randomUUID().toString());
         this.jdbcConfig.setDriver(getDriverClass());
+    }
+
+    @Override
+    public void close() {
+        disConn();
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.dsbie.rearend.mybatis.entity;
 
-import com.dsbie.rearend.manager.datasource.SysDataSource;
+import com.dsbie.rearend.mybatis.SysDataSource;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.Table;

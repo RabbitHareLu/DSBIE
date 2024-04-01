@@ -1,7 +1,7 @@
-package com.dsbie.rearend.common.utils;
+package com.dsbie.rearend.config;
 
+import com.dsbie.rearend.common.utils.ReflectUtil;
 import com.dsbie.rearend.exception.KToolException;
-import com.dsbie.rearend.manager.datasource.ConfigParam;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceConfig;
 
 import java.lang.reflect.Field;

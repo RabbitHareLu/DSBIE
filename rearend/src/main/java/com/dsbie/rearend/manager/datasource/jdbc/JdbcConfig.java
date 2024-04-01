@@ -1,6 +1,6 @@
 package com.dsbie.rearend.manager.datasource.jdbc;
 
-import com.dsbie.rearend.manager.datasource.ConfigParam;
+import com.dsbie.rearend.config.ConfigParam;
 import lombok.Data;
 
 /**
