@@ -28,13 +28,13 @@ public class JdbcConfig {
     /**
      * 用户名
      */
-    @ConfigParam(name = "用户名", key = "username")
+    @ConfigParam(name = "用户名", key = "username", must = true)
     private String username;
 
     /**
      * 密码
      */
-    @ConfigParam(name = "密码", key = "password")
+    @ConfigParam(name = "密码", key = "password", must = true)
     private String password;
 
 }
