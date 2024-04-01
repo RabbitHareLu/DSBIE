@@ -52,6 +52,7 @@ public class JdbcConnectionJPanel extends JPanel {
     private JTextField usernameInputField;
     private JPasswordField passwordInputField;
     private JTextField urlInputField;
+    private JComboBox<String> dbTypeComboBox;
 
     private JTable table;
     private DefaultTableModel defaultTableModel;
@@ -61,27 +62,13 @@ public class JdbcConnectionJPanel extends JPanel {
     private AdvancedJPanel advancedJPanel;
 
     private TreeEntity treeEntity;
-    private String dbType;
 
     public JdbcConnectionJPanel() {
 
     }
 
-    public JdbcConnectionJPanel(String dbType) {
-        this.dbType = dbType;
-        setLayout(new BorderLayout());
-        Box northBox = initNorthBox(null, null);
-        Box centerBox = initCenterBox(null);
-        Box southBox = initSouthBox();
-
-        add(northBox, BorderLayout.NORTH);
-        add(centerBox, BorderLayout.CENTER);
-        add(southBox, BorderLayout.SOUTH);
-    }
-
-    public JdbcConnectionJPanel(TreeEntity treeEntity, String dbType) {
+    public JdbcConnectionJPanel(TreeEntity treeEntity) {
         this.treeEntity = treeEntity;
-        this.dbType = dbType;
         setLayout(new BorderLayout());
         Box northBox = null;
         Box centerBox = null;
@@ -202,7 +189,7 @@ public class JdbcConnectionJPanel extends JPanel {
             treeEntity1.setNodePath(instance.getNodePathString(nodePathList));
 
             Map<String, String> nodeInfoMap = new LinkedHashMap<>();
-            nodeInfoMap.put("dbType", dbType);
+            nodeInfoMap.put("dbType", dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex()));
             nodeInfoMap.put("driver", StringUtil.isBlank(driverInputField.getText()) ? (String) driverInputField.getClientProperty("JTextField.placeholderText") : driverInputField.getText());
             nodeInfoMap.put("username", usernameInputField.getText());
             nodeInfoMap.put("password", new String(passwordInputField.getPassword()));
@@ -245,6 +232,14 @@ public class JdbcConnectionJPanel extends JPanel {
         box.add(okButton);
         box.add(Box.createHorizontalStrut(30));
         JButton cancelButton = new JButton("取消");
+        cancelButton.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+            int selectedIndex = DsbieJFrame.closableTabsTabbedPane.getSelectedIndex();
+            int tabCount = DsbieJFrame.closableTabsTabbedPane.getTabCount();
+            if (tabCount <= 1) {
+                DsbieJFrame.rootJSplitPane.setRightComponent(DsbieJFrame.logoLabel);
+            }
+            DsbieJFrame.closableTabsTabbedPane.remove(selectedIndex);
+        }));
         box.add(cancelButton);
 
         box.add(Box.createHorizontalStrut(100));
@@ -267,8 +262,7 @@ public class JdbcConnectionJPanel extends JPanel {
                 if (Objects.equals(source.getText(), "编辑")) {
                     TreeEntity currentTreeEntity = LeftTree.getInstance().getCurrentTreeEntity();
                     if (Objects.equals(currentTreeEntity.getNodeType(), LeftTreeNodeType.CONNECTION)) {
-                        String db = currentTreeEntity.getNodeInfo().get("dbType");
-                        jdbcConnectionJPanel = new JdbcConnectionJPanel(currentTreeEntity, db);
+                        jdbcConnectionJPanel = new JdbcConnectionJPanel(currentTreeEntity);
                         JdbcConnectionJPanel finalJdbcConnectionJPanel = jdbcConnectionJPanel;
                         SwingUtilities.invokeLater(() -> {
                             Component add = DsbieJFrame.closableTabsTabbedPane.add("编辑" + currentTreeEntity.getNodeName() + "数据源", finalJdbcConnectionJPanel);
@@ -277,10 +271,10 @@ public class JdbcConnectionJPanel extends JPanel {
                         });
                     }
                 } else {
-                    jdbcConnectionJPanel = new JdbcConnectionJPanel(source.getText());
+                    jdbcConnectionJPanel = new JdbcConnectionJPanel(null);
                     JdbcConnectionJPanel finalJdbcConnectionJPanel = jdbcConnectionJPanel;
                     SwingUtilities.invokeLater(() -> {
-                        Component add = DsbieJFrame.closableTabsTabbedPane.add("新建" + source.getText() + "数据源", finalJdbcConnectionJPanel);
+                        Component add = DsbieJFrame.closableTabsTabbedPane.add("新建数据源", finalJdbcConnectionJPanel);
                         DsbieJFrame.closableTabsTabbedPane.setSelectedComponent(add);
                         DsbieJFrame.rootJSplitPane.setRightComponent(DsbieJFrame.closableTabsTabbedPane);
                     });
@@ -333,6 +327,32 @@ public class JdbcConnectionJPanel extends JPanel {
             Box verticalBox = Box.createVerticalBox();
             verticalBox.add(Box.createVerticalStrut(30));
 
+            Box dbTypeBox = Box.createHorizontalBox();
+            JLabel dbTypeLabel = new JLabel("类型: ");
+            dbTypeBox.add(dbTypeLabel);
+            dbTypeBox.add(Box.createHorizontalStrut(30));
+            dbTypeComboBox = new JComboBox<>();
+            dbTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
+                    "Mysql",
+                    "Oracle"
+            }));
+            dbTypeComboBox.addActionListener(e -> {
+                String itemAt = dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex());
+                if (Objects.equals(itemAt, "Mysql")) {
+                    driverInputField.putClientProperty("JTextField.placeholderText", "com.mysql.cj.jdbc.driver");
+                } else if (Objects.equals(itemAt, "Oracle")) {
+                    driverInputField.putClientProperty("JTextField.placeholderText", "oracle.jdbc.OracleDriver");
+                }
+            });
+            dbTypeComboBox.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+            dbTypeBox.add(dbTypeComboBox);
+
+            Dimension dimension = dbTypeLabel.getPreferredSize();
+            double fixedWidth = 80;
+            double height = dimension.getHeight();
+            dimension.setSize(fixedWidth, height);
+            dbTypeLabel.setPreferredSize(dimension);
+
             Box driverBox = Box.createHorizontalBox();
             JLabel driverLabel = new JLabel("驱动: ");
             driverBox.add(driverLabel);
@@ -341,11 +361,6 @@ public class JdbcConnectionJPanel extends JPanel {
             driverInputField.putClientProperty("JTextField.placeholderText", "com.mysql.cj.jdbc.driver");
             driverInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
             driverBox.add(driverInputField);
-
-            Dimension dimension = driverLabel.getPreferredSize();
-            double fixedWidth = 80;
-            double height = dimension.getHeight();
-            dimension.setSize(fixedWidth, height);
             driverLabel.setPreferredSize(dimension);
 
             Box usernameBox = Box.createHorizontalBox();
@@ -377,6 +392,8 @@ public class JdbcConnectionJPanel extends JPanel {
             urlBox.add(urlInputField);
             urlLabel.setPreferredSize(dimension);
 
+            verticalBox.add(dbTypeBox);
+            verticalBox.add(Box.createVerticalStrut(30));
             verticalBox.add(driverBox);
             verticalBox.add(Box.createVerticalStrut(30));
             verticalBox.add(usernameBox);
@@ -387,6 +404,7 @@ public class JdbcConnectionJPanel extends JPanel {
 
             Optional.ofNullable(treeEntity).ifPresent(treeEntity -> {
                 Map<String, String> nodeInfo = treeEntity.getNodeInfo();
+                dbTypeComboBox.setSelectedItem(nodeInfo.get("dbType"));
                 driverInputField.setText(nodeInfo.get("driver"));
                 usernameInputField.setText(nodeInfo.get("username"));
                 passwordInputField.setText(nodeInfo.get("password"));
@@ -409,10 +427,6 @@ public class JdbcConnectionJPanel extends JPanel {
             Vector<Vector<String>> data = new Vector<>();
 
             if (Objects.isNull(treeEntity)) {
-                Vector<String> db = new Vector<>();
-                db.add("dbType");
-                db.add(dbType);
-                data.add(db);
                 Vector<String> batchDate = new Vector<>();
                 batchDate.add("batchCount");
                 batchDate.add("1000");
@@ -423,7 +437,8 @@ public class JdbcConnectionJPanel extends JPanel {
                     if (!Objects.equals(stringStringEntry.getKey(), "driver") &&
                             !Objects.equals(stringStringEntry.getKey(), "username") &&
                             !Objects.equals(stringStringEntry.getKey(), "password") &&
-                            !Objects.equals(stringStringEntry.getKey(), "url")) {
+                            !Objects.equals(stringStringEntry.getKey(), "url") &&
+                            !Objects.equals(stringStringEntry.getKey(), "dbType")) {
                         Vector<String> strings = new Vector<>();
                         strings.add(stringStringEntry.getKey());
                         strings.add(stringStringEntry.getValue());

@@ -144,8 +144,9 @@ public class DsbieJFrame extends JFrame {
             JMenuItem newFolder = new JMenuItem("新建文件夹");
             newFolder.setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
             newFolder.addActionListener(new LeftTree.NewFolderAction());
-            JMenu newJDBCConnection = new JMenu("新建JDBC连接");
+            JMenuItem newJDBCConnection = new JMenuItem("新建JDBC连接");
             newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
+            newJDBCConnection.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
             JMenuItem about = new JMenuItem("关于");
             about.setIcon(ImageLoadUtil.getInstance().getAboutIcon());
             newMenu.add(newJDBCConnection);
@@ -154,7 +155,7 @@ public class DsbieJFrame extends JFrame {
 
             setAboutAction(about);
             initFontMenu(fontNameMenu, fontSizeMenu, fontStyleMenu);
-            initDataSourceMenu(newJDBCConnection);
+//            initDataSourceMenu(newJDBCConnection);
 
             SwingUtilities.invokeLater(() -> {
                 add(jMenuBar, BorderLayout.NORTH);

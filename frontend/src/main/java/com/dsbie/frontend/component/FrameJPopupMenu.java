@@ -78,13 +78,14 @@ public class FrameJPopupMenu {
         rootNewFolderItem.addActionListener(new LeftTree.NewFolderAction());
         rootPopupMenu.add(rootNewFolderItem);
 
-        JMenu newJDBCConnection = new JMenu("新建JDBC连接");
+        JMenuItem newJDBCConnection = new JMenuItem("新建JDBC连接");
         newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
+        newJDBCConnection.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
 
-        JMenuItem jMenuItem = new JMenuItem("Mysql");
+       /* JMenuItem jMenuItem = new JMenuItem("Mysql");
         jMenuItem.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
         jMenuItem.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
-        newJDBCConnection.add(jMenuItem);
+        newJDBCConnection.add(jMenuItem);*/
 
         rootPopupMenu.add(newJDBCConnection);
     }
