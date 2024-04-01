@@ -2,6 +2,7 @@ package com.dsbie.rearend.manager.datasource.jdbc.adaper.mysql;
 
 import com.dsbie.rearend.exception.KToolException;
 import com.dsbie.rearend.manager.datasource.jdbc.AbstractJdbcHandler;
+import com.mysql.cj.MysqlType;
 import com.mysql.cj.jdbc.Driver;
 
 import java.sql.SQLType;
@@ -25,7 +26,7 @@ public class MysqlHandler extends AbstractJdbcHandler {
 
     @Override
     protected SQLType getSqlTypeByJdbcType(String typeName) {
-        return null;
+        return MysqlType.getByName(typeName);
     }
 
 }
