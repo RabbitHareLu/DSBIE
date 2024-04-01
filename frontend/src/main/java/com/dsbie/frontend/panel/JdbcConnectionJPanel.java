@@ -140,6 +140,7 @@ public class JdbcConnectionJPanel extends JPanel {
         box.add(Box.createHorizontalStrut(100));
         regularJPanel = new RegularJPanel();
         advancedJPanel = new AdvancedJPanel();
+        addDbTypeComboBoxActionListener();
         tabbedPane = new JTabbedPane();
         tabbedPane.addTab("常规", null, regularJPanel, "常规");
         tabbedPane.addTab("高级", null, advancedJPanel, "高级");
@@ -299,15 +300,47 @@ public class JdbcConnectionJPanel extends JPanel {
                 }
             }
             if (StringUtil.isNotBlank(key)) {
-                if (collect.get(key).isMust()) {
-                    if (StringUtil.isBlank(value)) {
-                        throw new KToolException(key + "不能为空");
+                KDataSourceConfig kDataSourceConfig = collect.get(key);
+                if (Objects.nonNull(kDataSourceConfig)) {
+                    if (collect.get(key).isMust()) {
+                        if (StringUtil.isBlank(value)) {
+                            throw new KToolException(key + "不能为空");
+                        }
                     }
                 }
                 nodeInfoMap.put(key, value);
             }
         }
         return nodeInfoMap;
+    }
+
+    private void addDbTypeComboBoxActionListener() {
+        dbTypeComboBox.addActionListener(e -> {
+            Vector<String> columnNames = new Vector<>();
+            columnNames.add("Key");
+            columnNames.add("Value");
+
+            Vector<Vector<String>> data = new Vector<>();
+            KDataSourceMetadata kDataSourceMetadata = supportJdbcMap.get(dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex()));
+
+            //  必填项直接放进table中
+            List<KDataSourceConfig> mustList = kDataSourceMetadata.getConfig().stream()
+                    .filter(
+                            kDataSourceConfig -> !Objects.equals(kDataSourceConfig.getKey(), "username") &&
+                                    !Objects.equals(kDataSourceConfig.getKey(), "password") &&
+                                    !Objects.equals(kDataSourceConfig.getKey(), "jdbcUrl"))
+                    .filter(KDataSourceConfig::isMust).toList();
+            for (KDataSourceConfig kDataSourceConfig : mustList) {
+                Vector<String> strings = new Vector<>();
+                strings.add(kDataSourceConfig.getKey());
+                strings.add(kDataSourceConfig.getDefaultValue());
+                data.add(strings);
+            }
+
+            defaultTableModel.setDataVector(data, columnNames);
+            // 设置key列下拉框的值
+            initKeyJComboBox();
+        });
     }
 
 
@@ -405,35 +438,6 @@ public class JdbcConnectionJPanel extends JPanel {
 
             dbTypeComboBox.setModel(new DefaultComboBoxModel<>(typeVector));
 
-            dbTypeComboBox.addActionListener(e -> {
-                CompletableFutureUtil.submit(() -> {
-                    Vector<String> columnNames = new Vector<>();
-                    columnNames.add("Key");
-                    columnNames.add("Value");
-
-                    Vector<Vector<String>> data = new Vector<>();
-                    KDataSourceMetadata kDataSourceMetadata = supportJdbcMap.get(dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex()));
-
-                    //  必填项直接放进table中
-                    List<KDataSourceConfig> mustList = kDataSourceMetadata.getConfig().stream()
-                            .filter(
-                                    kDataSourceConfig -> !Objects.equals(kDataSourceConfig.getKey(), "username") &&
-                                            !Objects.equals(kDataSourceConfig.getKey(), "password") &&
-                                            !Objects.equals(kDataSourceConfig.getKey(), "jdbcUrl"))
-                            .filter(KDataSourceConfig::isMust).toList();
-                    for (KDataSourceConfig kDataSourceConfig : mustList) {
-                        Vector<String> strings = new Vector<>();
-                        strings.add(kDataSourceConfig.getKey());
-                        strings.add(kDataSourceConfig.getDefaultValue());
-                        data.add(strings);
-                    }
-
-                    defaultTableModel.setDataVector(data, columnNames);
-                    // 设置key列下拉框的值
-                    initKeyJComboBox();
-                });
-            });
-
             dbTypeBox.add(dbTypeComboBox);
 
             Dimension dimension = dbTypeLabel.getPreferredSize();
@@ -530,7 +534,6 @@ public class JdbcConnectionJPanel extends JPanel {
             Vector<Vector<String>> data = new Vector<>();
             if (isNew) {
                 KDataSourceMetadata kDataSourceMetadata = supportJdbcMap.get(dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex()));
-
                 //  必填项直接放进table中
                 List<KDataSourceConfig> mustList = kDataSourceMetadata.getConfig().stream()
                         .filter(
@@ -593,7 +596,7 @@ public class JdbcConnectionJPanel extends JPanel {
 
             tableJScrollPane.addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseClicked(MouseEvent e) {
+                public void mousePressed(MouseEvent e) {
                     if (table.isEditing()) {
                         table.getCellEditor().stopCellEditing();
                     }
