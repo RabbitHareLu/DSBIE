@@ -4,7 +4,6 @@ import com.dsbie.frontend.Main;
 import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.panel.JdbcConnectionJPanel;
-import com.dsbie.frontend.threadpool.FrontendThreadPool;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.FontUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
@@ -20,7 +19,6 @@ import java.awt.*;
 import java.time.Year;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author lsl
@@ -167,7 +165,7 @@ public class DsbieJFrame extends JFrame {
 
     private void initDataSourceMenu(JMenu newJDBCConnection) {
         JMenuItem jMenuItem = new JMenuItem("Mysql");
-//        jMenuItem.setIcon(ImageLoadUtil.getInstance().buildIcon(metadata.getLogo()));
+        jMenuItem.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
         jMenuItem.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
         newJDBCConnection.add(jMenuItem);
     }

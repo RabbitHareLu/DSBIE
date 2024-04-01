@@ -39,6 +39,11 @@
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.alexandriasoftware.swing</groupId>
+            <artifactId>jinputvalidator</artifactId>
+        </dependency>
     </dependencies>
 
 

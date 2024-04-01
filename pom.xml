@@ -35,6 +35,7 @@
         <kudu.version>1.17.0</kudu.version>
         <impalajdbc41.version>2.6.30.1036</impalajdbc41.version>
         <mybatis-flex.version>1.8.4</mybatis-flex.version>
+        <jinputvalidator.version>0.9.0</jinputvalidator.version>
     </properties>
 
     <dependencyManagement>
@@ -175,6 +176,12 @@
                 <groupId>com.mybatis-flex</groupId>
                 <artifactId>mybatis-flex-core</artifactId>
                 <version>${mybatis-flex.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alexandriasoftware.swing</groupId>
+                <artifactId>jinputvalidator</artifactId>
+                <version>${jinputvalidator.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

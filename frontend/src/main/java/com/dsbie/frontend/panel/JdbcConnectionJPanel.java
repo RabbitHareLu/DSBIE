@@ -1,11 +1,20 @@
 package com.dsbie.frontend.panel;
 
+import com.dsbie.frontend.Main;
 import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
+import com.dsbie.frontend.component.LeftTreeNode;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
+import com.dsbie.frontend.utils.ComponentVerifierUtil;
+import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
+import com.dsbie.rearend.KToolsContext;
+import com.dsbie.rearend.api.SystemApi;
+import com.dsbie.rearend.common.utils.StringUtil;
+import com.dsbie.rearend.exception.KToolException;
+import com.dsbie.rearend.manager.uid.UidKey;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 import com.formdev.flatlaf.FlatClientProperties;
 import lombok.Getter;
@@ -15,12 +24,16 @@ import lombok.extern.slf4j.Slf4j;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Objects;
+import java.io.Serial;
+import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
@@ -91,6 +104,7 @@ public class JdbcConnectionJPanel extends JPanel {
         nameInputField = new JTextField();
         nameInputField.setText(name);
         nameInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        ComponentVerifierUtil.notBlank(nameInputField);
         box.add(nameInputField);
 
         box.add(Box.createHorizontalStrut(50));
@@ -104,12 +118,18 @@ public class JdbcConnectionJPanel extends JPanel {
         commentInputField = new JTextField(comment);
         commentInputField.setText(comment);
         commentInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        ComponentVerifierUtil.notBlank(commentInputField);
         box.add(commentInputField);
 
         box.add(Box.createHorizontalStrut(100));
 
         verticalBox.add(box);
         verticalBox.add(Box.createVerticalStrut(30));
+
+        Optional.ofNullable(treeEntity).ifPresent(treeEntity -> {
+            nameInputField.setText(treeEntity.getNodeName());
+            commentInputField.setText(treeEntity.getNodeComment());
+        });
 
         return verticalBox;
     }
@@ -135,12 +155,74 @@ public class JdbcConnectionJPanel extends JPanel {
         box.add(Box.createHorizontalStrut(100));
 
         JButton testButton = new JButton("测试连接");
+        testButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
         box.add(testButton);
 
         box.add(Box.createHorizontalGlue());
 
         JButton okButton = new JButton("确认");
         okButton.setBackground(new Color(53, 116, 240));
+        okButton.addActionListener(e -> CompletableFutureUtil.submit(() -> {
+            LeftTree instance = LeftTree.getInstance();
+            TreePath selectionPath = instance.getCurrentTreePath();
+            LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
+
+            TreeEntity treeEntity1 = new TreeEntity();
+            treeEntity1.setId(KToolsContext.getInstance().getIdGenerator().getId(UidKey.TREE));
+            treeEntity1.setParentNodeId(currentTreeNode.getTreeEntity().getId());
+            treeEntity1.setNodeName(nameInputField.getText());
+            treeEntity1.setNodeType(LeftTreeNodeType.CONNECTION);
+            treeEntity1.setNodeComment(commentInputField.getText());
+
+            List<String> nodePathList = new ArrayList<>();
+            instance.buildTreeNodePath(nodePathList, selectionPath);
+            treeEntity1.setNodePath(instance.getNodePathString(nodePathList));
+
+            Map<String, String> nodeInfoMap = new LinkedHashMap<>();
+            nodeInfoMap.put("driver", driverInputField.getText());
+            nodeInfoMap.put("username", usernameInputField.getText());
+            nodeInfoMap.put("password", Arrays.toString(passwordInputField.getPassword()));
+            nodeInfoMap.put("url", urlInputField.getText());
+
+            for (int row = 0; row < table.getRowCount(); row++) {
+                String key = null;
+                String value = null;
+                for (int col = 0; col < table.getColumnCount(); col++) {
+                    if (col == 0) {
+                        key = (String) table.getValueAt(row, col);
+                    } else {
+                        value = (String) table.getValueAt(row, col);
+                    }
+                }
+                if (StringUtil.isNotBlank(key)) {
+                    nodeInfoMap.put(key, value);
+                }
+            }
+            treeEntity1.setNodeInfo(nodeInfoMap);
+
+            treeEntity1.setChild(null);
+            try {
+                KToolsContext.getInstance().getApi(SystemApi.class).addNode(treeEntity1);
+            } catch (KToolException ex) {
+                DialogUtil.showErrorDialog(Main.dsbieJFrame, ex.getMessage());
+                log.error(ex.getMessage(), ex);
+                throw new RuntimeException(ex);
+            }
+
+            LeftTreeNode leftTreeNode = new LeftTreeNode(treeEntity1);
+            DefaultTreeModel model = (DefaultTreeModel) instance.getTreeModel();
+            SwingUtilities.invokeLater(() -> {
+                model.insertNodeInto(leftTreeNode, currentTreeNode, currentTreeNode.getChildCount());
+                instance.expandTreeNode(selectionPath);
+            });
+
+        }));
+
         box.add(okButton);
         box.add(Box.createHorizontalStrut(30));
         JButton cancelButton = new JButton("取消");
@@ -161,21 +243,22 @@ public class JdbcConnectionJPanel extends JPanel {
             CompletableFutureUtil.submit(() -> {
                 JMenuItem source = (JMenuItem) e.getSource();
                 initTabbedPane();
-                SwingUtilities.invokeLater(() -> DsbieJFrame.rootJSplitPane.setRightComponent(DsbieJFrame.closableTabsTabbedPane));
-
-                TreeEntity currentTreeEntity = LeftTree.getInstance().getCurrentTreeEntity();
                 JdbcConnectionJPanel jdbcConnectionJPanel = null;
-                if (Objects.equals(currentTreeEntity.getNodeType(), LeftTreeNodeType.CONNECTION)) {
-                    jdbcConnectionJPanel = new JdbcConnectionJPanel(currentTreeEntity);
+
+                if (Objects.equals(source.getText(), "编辑")) {
+                    TreeEntity currentTreeEntity = LeftTree.getInstance().getCurrentTreeEntity();
+                    if (Objects.equals(currentTreeEntity.getNodeType(), LeftTreeNodeType.CONNECTION)) {
+                        jdbcConnectionJPanel = new JdbcConnectionJPanel(currentTreeEntity);
+                    }
                 } else {
                     jdbcConnectionJPanel = new JdbcConnectionJPanel(null);
+                    JdbcConnectionJPanel finalJdbcConnectionJPanel = jdbcConnectionJPanel;
+                    SwingUtilities.invokeLater(() -> {
+                        Component add = DsbieJFrame.closableTabsTabbedPane.add("新建" + source.getText() + "数据源", finalJdbcConnectionJPanel);
+                        DsbieJFrame.closableTabsTabbedPane.setSelectedComponent(add);
+                        DsbieJFrame.rootJSplitPane.setRightComponent(DsbieJFrame.closableTabsTabbedPane);
+                    });
                 }
-
-                JdbcConnectionJPanel finalJdbcConnectionJPanel = jdbcConnectionJPanel;
-                SwingUtilities.invokeLater(() -> {
-                    Component add = DsbieJFrame.closableTabsTabbedPane.add("新建" + source.getText() + "数据源", finalJdbcConnectionJPanel);
-                    DsbieJFrame.closableTabsTabbedPane.setSelectedComponent(add);
-                });
             });
         }
 
@@ -264,6 +347,7 @@ public class JdbcConnectionJPanel extends JPanel {
             urlBox.add(Box.createHorizontalStrut(30));
             urlInputField = new JTextField();
             urlInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+            ComponentVerifierUtil.notBlank(urlInputField);
             urlBox.add(urlInputField);
             urlLabel.setPreferredSize(dimension);
 
@@ -274,6 +358,14 @@ public class JdbcConnectionJPanel extends JPanel {
             verticalBox.add(passwordBox);
             verticalBox.add(Box.createVerticalStrut(30));
             verticalBox.add(urlBox);
+
+            Optional.ofNullable(treeEntity).ifPresent(treeEntity -> {
+                Map<String, String> nodeInfo = treeEntity.getNodeInfo();
+                driverInputField.setText(nodeInfo.get("driver"));
+                usernameInputField.setText(nodeInfo.get("username"));
+                passwordInputField.setText(nodeInfo.get("password"));
+                urlInputField.setText(nodeInfo.get("url"));
+            });
 
             add(verticalBox, BorderLayout.NORTH);
         }
@@ -288,20 +380,43 @@ public class JdbcConnectionJPanel extends JPanel {
             setLayout(new BorderLayout());
             Box horizontalBox = Box.createHorizontalBox();
 
-            String[][] data = {
-                    {"BatchCount", "1000"}
-            };
+            Vector<Vector<String>> data = new Vector<>();
+
+            if (Objects.isNull(treeEntity)) {
+                Vector<String> strings = new Vector<>();
+                strings.add("BatchDate");
+                strings.add("1000");
+                data.add(strings);
+            } else {
+                Map<String, String> nodeInfo = treeEntity.getNodeInfo();
+                for (Map.Entry<String, String> stringStringEntry : nodeInfo.entrySet()) {
+                    if (!Objects.equals(stringStringEntry.getKey(), "driver") &&
+                            !Objects.equals(stringStringEntry.getKey(), "username") &&
+                            !Objects.equals(stringStringEntry.getKey(), "password") &&
+                            !Objects.equals(stringStringEntry.getKey(), "url")) {
+                        Vector<String> strings = new Vector<>();
+                        strings.add(stringStringEntry.getKey());
+                        strings.add(stringStringEntry.getValue());
+                        data.add(strings);
+                    }
+                }
+            }
+
             JScrollPane tableJScrollPane = new JScrollPane();
             table = new JTable();
-            defaultTableModel = new DefaultTableModel(data,
-                    new String[]{
-                            "Key", "Value"
-                    }) {
-                Class<?>[] columnTypes = {
+            Vector<String> columnNames = new Vector<>();
+            columnNames.add("Key");
+            columnNames.add("Value");
+
+            defaultTableModel = new DefaultTableModel(data, columnNames) {
+                @Serial
+                private static final long serialVersionUID = -470007373566602554L;
+
+                final Class<?>[] columnTypes = {
                         String.class, String.class
                 };
 
-                boolean[] columnEditable = {
+                final boolean[] columnEditable = {
                         true, true
                 };
 
@@ -320,13 +435,13 @@ public class JdbcConnectionJPanel extends JPanel {
             table.setModel(defaultTableModel);
             TableColumnModel columnModel = table.getColumnModel();
             columnModel.getColumn(0).setCellEditor(new DefaultCellEditor(
-                    new JComboBox(new DefaultComboBoxModel(new String[]{
+                    new JComboBox<>(new DefaultComboBoxModel<>(new String[]{
                             "BatchCount",
-                            "BatchCount2",
                     }))));
 
-            ((JComboBox) ((DefaultCellEditor) table.getColumnModel().getColumn(0).getCellEditor()).getComponent())
+            ((JComboBox<?>) ((DefaultCellEditor) table.getColumnModel().getColumn(0).getCellEditor()).getComponent())
                     .setEditable(true);
+
             table.setShowHorizontalLines(true);
             table.setShowVerticalLines(true);
             tableJScrollPane.setViewportView(table);

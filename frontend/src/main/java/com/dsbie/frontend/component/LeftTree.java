@@ -154,6 +154,7 @@ public class LeftTree {
                             setIcon(ImageLoadUtil.getInstance().getFolderCloseIcon());
                         }
                     }
+                    case LeftTreeNodeType.CONNECTION -> setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
                     default -> log.info("default");
                 }
             }

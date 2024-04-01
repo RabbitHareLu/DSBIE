@@ -22,6 +22,8 @@ public class CompletableFutureUtil {
                         Throwable rootCause = getRootCause(ex);
                         if (!(rootCause instanceof KToolException)) {
                             DialogUtil.showErrorDialog(Main.dsbieJFrame, "系统异常");
+                        } else {
+                            // 弹框提示message
                         }
                         log.error(rootCause.getMessage(), rootCause);
                     }

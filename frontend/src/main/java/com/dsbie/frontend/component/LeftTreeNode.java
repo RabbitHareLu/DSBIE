@@ -15,6 +15,10 @@ public class LeftTreeNode extends DefaultMutableTreeNode {
 
     private TreeEntity treeEntity;
 
+    public LeftTreeNode() {
+
+    }
+
     public LeftTreeNode(TreeEntity treeEntity) {
         super(treeEntity.getNodeName());
         this.treeEntity = treeEntity;
