@@ -112,15 +112,16 @@ public class DsbieJFrame extends JFrame {
             jMenuBar.add(settingsMenu);
             jMenuBar.add(helpMenu);
 
-            JMenu newMenu = new JMenu("新建");
+            /*JMenu newMenu = new JMenu("新建");
             newMenu.setIcon(ImageLoadUtil.getInstance().getNewIcon());
+            fileMenu.add(newMenu);*/
+
             JMenuItem exitMenu = new JMenuItem("退出");
             exitMenu.setIcon(ImageLoadUtil.getInstance().getExitIcon());
             exitMenu.addActionListener(e -> {
                 log.info("程序退出");
                 dispose();
             });
-            fileMenu.add(newMenu);
             fileMenu.add(exitMenu);
 
             JMenuItem renameMenu = new JMenuItem("重命名");
@@ -141,16 +142,17 @@ public class DsbieJFrame extends JFrame {
             fontMenu.add(fontSizeMenu);
             fontMenu.add(fontStyleMenu);
 
-            JMenuItem newFolder = new JMenuItem("新建文件夹");
+            /*JMenuItem newFolder = new JMenuItem("新建文件夹");
             newFolder.setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
             newFolder.addActionListener(new LeftTree.NewFolderAction());
             JMenuItem newJDBCConnection = new JMenuItem("新建JDBC连接");
             newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
             newJDBCConnection.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
+            newMenu.add(newJDBCConnection);
+            newMenu.add(newFolder);*/
+
             JMenuItem about = new JMenuItem("关于");
             about.setIcon(ImageLoadUtil.getInstance().getAboutIcon());
-            newMenu.add(newJDBCConnection);
-            newMenu.add(newFolder);
             helpMenu.add(about);
 
             setAboutAction(about);

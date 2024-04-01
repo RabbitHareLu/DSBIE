@@ -82,20 +82,21 @@ public class FrameJPopupMenu {
         newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
         newJDBCConnection.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
 
-       /* JMenuItem jMenuItem = new JMenuItem("Mysql");
-        jMenuItem.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
-        jMenuItem.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
-        newJDBCConnection.add(jMenuItem);*/
-
         rootPopupMenu.add(newJDBCConnection);
     }
 
     private void initFolderPopupMenu() {
         folderPopupMenu = new JPopupMenu();
+
         JMenuItem folderNewFolderItem = new JMenuItem("新建目录");
         folderNewFolderItem.setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
         folderNewFolderItem.addActionListener(new LeftTree.NewFolderAction());
         folderPopupMenu.add(folderNewFolderItem);
+
+        JMenuItem newJDBCConnection = new JMenuItem("新建JDBC连接");
+        newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
+        newJDBCConnection.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
+        folderPopupMenu.add(newJDBCConnection);
 
         JMenuItem folderRenameFolderItem = new JMenuItem("重命名");
         folderRenameFolderItem.setIcon(ImageLoadUtil.getInstance().getRenameIcon());

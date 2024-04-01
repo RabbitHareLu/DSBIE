@@ -172,6 +172,17 @@ public class LeftTree {
         return ((LeftTreeNode) selectionPath.getLastPathComponent()).getTreeEntity();
     }
 
+    /**
+     * 判断当前节点是否还在树中
+     *
+     * @param leftTreeNode
+     * @return {@link Boolean}
+     * @author lsl
+     * @date 2024/4/1 14:44
+     */
+    public Boolean isNodeDescendant(LeftTreeNode leftTreeNode) {
+        return ((LeftTreeNode) defaultTreeModel.getRoot()).isNodeDescendant(leftTreeNode);
+    }
 
     public TreePath getCurrentTreePath() {
         TreePath selectionPath = jTree.getSelectionPath();
@@ -217,6 +228,16 @@ public class LeftTree {
             }
         }
     }
+
+    /*public boolean isNodeValid(TreeEntity treeEntity) {
+        String nodePath = treeEntity.getNodePath();
+        List<String> split = StringUtil.split(nodePath, "/");
+        TreeModel treeModel = getTreeModel();
+        LeftTreeNode root = (LeftTreeNode) treeModel.getRoot();
+        root.isNodeChild()
+
+        return false;
+    }*/
 
     public static class NewFolderAction implements ActionListener {
         @Override
