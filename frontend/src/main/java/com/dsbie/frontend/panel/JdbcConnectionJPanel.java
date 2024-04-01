@@ -1,5 +1,6 @@
 package com.dsbie.frontend.panel;
 
+import com.dsbie.frontend.Main;
 import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.component.LeftTreeNode;
@@ -9,6 +10,7 @@ import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.ComponentVerifierUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
+import com.dsbie.rearend.api.DataSourceApi;
 import com.dsbie.rearend.api.SystemApi;
 import com.dsbie.rearend.common.utils.StringUtil;
 import com.dsbie.rearend.exception.KToolException;
@@ -149,12 +151,13 @@ public class JdbcConnectionJPanel extends JPanel {
         box.add(Box.createHorizontalStrut(100));
 
         JButton testButton = new JButton("测试连接");
-        testButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        });
+        testButton.addActionListener(e -> CompletableFutureUtil.submit(() -> {
+            Map<String, String> nodeInfo = getNodeInfo();
+            KToolsContext.getInstance().getApi(DataSourceApi.class).testDataSource(nodeInfo.get("dbType"), nodeInfo);
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Main.dsbieJFrame,
+                    new Object[]{"数据源连接测试成功！"},
+                    "测试连接", JOptionPane.PLAIN_MESSAGE));
+        }));
         box.add(testButton);
 
         box.add(Box.createHorizontalGlue());
@@ -263,7 +266,7 @@ public class JdbcConnectionJPanel extends JPanel {
         nodeInfoMap.put("driver", StringUtil.isBlank(driverInputField.getText()) ? (String) driverInputField.getClientProperty("JTextField.placeholderText") : driverInputField.getText());
         nodeInfoMap.put("username", usernameInputField.getText());
         nodeInfoMap.put("password", new String(passwordInputField.getPassword()));
-        nodeInfoMap.put("url", urlInputField.getText());
+        nodeInfoMap.put("jdbcUrl", urlInputField.getText());
 
         for (int row = 0; row < table.getRowCount(); row++) {
             String key = null;
@@ -445,7 +448,7 @@ public class JdbcConnectionJPanel extends JPanel {
                 driverInputField.setText(nodeInfo.get("driver"));
                 usernameInputField.setText(nodeInfo.get("username"));
                 passwordInputField.setText(nodeInfo.get("password"));
-                urlInputField.setText(nodeInfo.get("url"));
+                urlInputField.setText(nodeInfo.get("jdbcUrl"));
             }
 
             add(verticalBox, BorderLayout.NORTH);
@@ -474,7 +477,7 @@ public class JdbcConnectionJPanel extends JPanel {
                     if (!Objects.equals(stringStringEntry.getKey(), "driver") &&
                             !Objects.equals(stringStringEntry.getKey(), "username") &&
                             !Objects.equals(stringStringEntry.getKey(), "password") &&
-                            !Objects.equals(stringStringEntry.getKey(), "url") &&
+                            !Objects.equals(stringStringEntry.getKey(), "jdbcUrl") &&
                             !Objects.equals(stringStringEntry.getKey(), "dbType")) {
                         Vector<String> strings = new Vector<>();
                         strings.add(stringStringEntry.getKey());

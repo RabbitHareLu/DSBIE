@@ -3,7 +3,6 @@ package com.dsbie.frontend.frame;
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
-import com.dsbie.frontend.panel.JdbcConnectionJPanel;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.FontUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
@@ -112,10 +111,6 @@ public class DsbieJFrame extends JFrame {
             jMenuBar.add(settingsMenu);
             jMenuBar.add(helpMenu);
 
-            /*JMenu newMenu = new JMenu("新建");
-            newMenu.setIcon(ImageLoadUtil.getInstance().getNewIcon());
-            fileMenu.add(newMenu);*/
-
             JMenuItem exitMenu = new JMenuItem("退出");
             exitMenu.setIcon(ImageLoadUtil.getInstance().getExitIcon());
             exitMenu.addActionListener(e -> {
@@ -142,35 +137,18 @@ public class DsbieJFrame extends JFrame {
             fontMenu.add(fontSizeMenu);
             fontMenu.add(fontStyleMenu);
 
-            /*JMenuItem newFolder = new JMenuItem("新建文件夹");
-            newFolder.setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
-            newFolder.addActionListener(new LeftTree.NewFolderAction());
-            JMenuItem newJDBCConnection = new JMenuItem("新建JDBC连接");
-            newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
-            newJDBCConnection.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
-            newMenu.add(newJDBCConnection);
-            newMenu.add(newFolder);*/
-
             JMenuItem about = new JMenuItem("关于");
             about.setIcon(ImageLoadUtil.getInstance().getAboutIcon());
             helpMenu.add(about);
 
             setAboutAction(about);
             initFontMenu(fontNameMenu, fontSizeMenu, fontStyleMenu);
-//            initDataSourceMenu(newJDBCConnection);
 
             SwingUtilities.invokeLater(() -> {
                 add(jMenuBar, BorderLayout.NORTH);
                 validate();
             });
         });
-    }
-
-    private void initDataSourceMenu(JMenu newJDBCConnection) {
-        JMenuItem jMenuItem = new JMenuItem("Mysql");
-        jMenuItem.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
-        jMenuItem.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
-        newJDBCConnection.add(jMenuItem);
     }
 
     private void initFontMenu(JMenu fontNameMenu, JMenu fontSizeMenu, JMenu fontStyleMenu) {
