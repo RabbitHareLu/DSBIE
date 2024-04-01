@@ -1,6 +1,5 @@
 package com.dsbie.frontend.panel;
 
-import com.dsbie.frontend.Main;
 import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.component.LeftTreeNode;
@@ -8,7 +7,6 @@ import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.ComponentVerifierUtil;
-import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
 import com.dsbie.rearend.api.SystemApi;
@@ -63,13 +61,27 @@ public class JdbcConnectionJPanel extends JPanel {
     private AdvancedJPanel advancedJPanel;
 
     private TreeEntity treeEntity;
+    private String dbType;
 
     public JdbcConnectionJPanel() {
 
     }
 
-    public JdbcConnectionJPanel(TreeEntity treeEntity) {
+    public JdbcConnectionJPanel(String dbType) {
+        this.dbType = dbType;
+        setLayout(new BorderLayout());
+        Box northBox = initNorthBox(null, null);
+        Box centerBox = initCenterBox(null);
+        Box southBox = initSouthBox();
+
+        add(northBox, BorderLayout.NORTH);
+        add(centerBox, BorderLayout.CENTER);
+        add(southBox, BorderLayout.SOUTH);
+    }
+
+    public JdbcConnectionJPanel(TreeEntity treeEntity, String dbType) {
         this.treeEntity = treeEntity;
+        this.dbType = dbType;
         setLayout(new BorderLayout());
         Box northBox = null;
         Box centerBox = null;
@@ -118,7 +130,6 @@ public class JdbcConnectionJPanel extends JPanel {
         commentInputField = new JTextField(comment);
         commentInputField.setText(comment);
         commentInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        ComponentVerifierUtil.notBlank(commentInputField);
         box.add(commentInputField);
 
         box.add(Box.createHorizontalStrut(100));
@@ -168,6 +179,13 @@ public class JdbcConnectionJPanel extends JPanel {
         JButton okButton = new JButton("确认");
         okButton.setBackground(new Color(53, 116, 240));
         okButton.addActionListener(e -> CompletableFutureUtil.submit(() -> {
+            if (StringUtil.isBlank(nameInputField.getText())) {
+                throw new KToolException("名称不能为空");
+            }
+            if (StringUtil.isBlank(urlInputField.getText())) {
+                throw new KToolException("URL不能为空");
+            }
+
             LeftTree instance = LeftTree.getInstance();
             TreePath selectionPath = instance.getCurrentTreePath();
             LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
@@ -184,9 +202,10 @@ public class JdbcConnectionJPanel extends JPanel {
             treeEntity1.setNodePath(instance.getNodePathString(nodePathList));
 
             Map<String, String> nodeInfoMap = new LinkedHashMap<>();
-            nodeInfoMap.put("driver", driverInputField.getText());
+            nodeInfoMap.put("dbType", dbType);
+            nodeInfoMap.put("driver", StringUtil.isBlank(driverInputField.getText()) ? (String) driverInputField.getClientProperty("JTextField.placeholderText") : driverInputField.getText());
             nodeInfoMap.put("username", usernameInputField.getText());
-            nodeInfoMap.put("password", Arrays.toString(passwordInputField.getPassword()));
+            nodeInfoMap.put("password", new String(passwordInputField.getPassword()));
             nodeInfoMap.put("url", urlInputField.getText());
 
             for (int row = 0; row < table.getRowCount(); row++) {
@@ -206,21 +225,21 @@ public class JdbcConnectionJPanel extends JPanel {
             treeEntity1.setNodeInfo(nodeInfoMap);
 
             treeEntity1.setChild(null);
-            try {
-                KToolsContext.getInstance().getApi(SystemApi.class).addNode(treeEntity1);
-            } catch (KToolException ex) {
-                DialogUtil.showErrorDialog(Main.dsbieJFrame, ex.getMessage());
-                log.error(ex.getMessage(), ex);
-                throw new RuntimeException(ex);
-            }
+
+            KToolsContext.getInstance().getApi(SystemApi.class).addNode(treeEntity1);
 
             LeftTreeNode leftTreeNode = new LeftTreeNode(treeEntity1);
             DefaultTreeModel model = (DefaultTreeModel) instance.getTreeModel();
             SwingUtilities.invokeLater(() -> {
                 model.insertNodeInto(leftTreeNode, currentTreeNode, currentTreeNode.getChildCount());
                 instance.expandTreeNode(selectionPath);
+                int selectedIndex = DsbieJFrame.closableTabsTabbedPane.getSelectedIndex();
+                int tabCount = DsbieJFrame.closableTabsTabbedPane.getTabCount();
+                if (tabCount <= 1) {
+                    DsbieJFrame.rootJSplitPane.setRightComponent(DsbieJFrame.logoLabel);
+                }
+                DsbieJFrame.closableTabsTabbedPane.remove(selectedIndex);
             });
-
         }));
 
         box.add(okButton);
@@ -248,10 +267,17 @@ public class JdbcConnectionJPanel extends JPanel {
                 if (Objects.equals(source.getText(), "编辑")) {
                     TreeEntity currentTreeEntity = LeftTree.getInstance().getCurrentTreeEntity();
                     if (Objects.equals(currentTreeEntity.getNodeType(), LeftTreeNodeType.CONNECTION)) {
-                        jdbcConnectionJPanel = new JdbcConnectionJPanel(currentTreeEntity);
+                        String db = currentTreeEntity.getNodeInfo().get("dbType");
+                        jdbcConnectionJPanel = new JdbcConnectionJPanel(currentTreeEntity, db);
+                        JdbcConnectionJPanel finalJdbcConnectionJPanel = jdbcConnectionJPanel;
+                        SwingUtilities.invokeLater(() -> {
+                            Component add = DsbieJFrame.closableTabsTabbedPane.add("编辑" + currentTreeEntity.getNodeName() + "数据源", finalJdbcConnectionJPanel);
+                            DsbieJFrame.closableTabsTabbedPane.setSelectedComponent(add);
+                            DsbieJFrame.rootJSplitPane.setRightComponent(DsbieJFrame.closableTabsTabbedPane);
+                        });
                     }
                 } else {
-                    jdbcConnectionJPanel = new JdbcConnectionJPanel(null);
+                    jdbcConnectionJPanel = new JdbcConnectionJPanel(source.getText());
                     JdbcConnectionJPanel finalJdbcConnectionJPanel = jdbcConnectionJPanel;
                     SwingUtilities.invokeLater(() -> {
                         Component add = DsbieJFrame.closableTabsTabbedPane.add("新建" + source.getText() + "数据源", finalJdbcConnectionJPanel);
@@ -383,10 +409,14 @@ public class JdbcConnectionJPanel extends JPanel {
             Vector<Vector<String>> data = new Vector<>();
 
             if (Objects.isNull(treeEntity)) {
-                Vector<String> strings = new Vector<>();
-                strings.add("BatchDate");
-                strings.add("1000");
-                data.add(strings);
+                Vector<String> db = new Vector<>();
+                db.add("dbType");
+                db.add(dbType);
+                data.add(db);
+                Vector<String> batchDate = new Vector<>();
+                batchDate.add("batchCount");
+                batchDate.add("1000");
+                data.add(batchDate);
             } else {
                 Map<String, String> nodeInfo = treeEntity.getNodeInfo();
                 for (Map.Entry<String, String> stringStringEntry : nodeInfo.entrySet()) {
@@ -436,7 +466,7 @@ public class JdbcConnectionJPanel extends JPanel {
             TableColumnModel columnModel = table.getColumnModel();
             columnModel.getColumn(0).setCellEditor(new DefaultCellEditor(
                     new JComboBox<>(new DefaultComboBoxModel<>(new String[]{
-                            "BatchCount",
+                            "batchCount",
                     }))));
 
             ((JComboBox<?>) ((DefaultCellEditor) table.getColumnModel().getColumn(0).getCellEditor()).getComponent())

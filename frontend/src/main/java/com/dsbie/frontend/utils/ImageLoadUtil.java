@@ -33,6 +33,7 @@ public class ImageLoadUtil {
     private ImageIcon closeTabbedIcon = null;
     private ImageIcon addRowIcon = null;
     private ImageIcon deleteRowIcon = null;
+    private ImageIcon editIcon = null;
 
     private ImageLoadUtil() {
         logoIcon = buildIcon("images/logo.svg");
@@ -53,6 +54,7 @@ public class ImageLoadUtil {
         closeTabbedIcon = buildIcon("images/closeTabbed.svg");
         addRowIcon = buildIcon("images/addRow.svg");
         deleteRowIcon = buildIcon("images/deleteRow.svg");
+        editIcon = buildIcon("images/edit.svg");
     }
 
     public static ImageLoadUtil getInstance() {

@@ -5,7 +5,7 @@ package com.dsbie.rearend.exception;
  *
  * @author WCG
  */
-public class KToolException extends Exception {
+public class KToolException extends RuntimeException {
 
     public KToolException(String msg) {
         super(msg);

@@ -111,7 +111,7 @@ public class LeftTree {
                         } else if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.TABLE)) {
 //                            frameJPopupMenu.getTablePopupMenu().show(jTree, x, y);
                         } else {
-//                            frameJPopupMenu.getJdbcPopupMenu().show(jTree, x, y);
+                            frameJPopupMenu.getConnectionPopupMenu().show(jTree, x, y);
                         }
                     } else {
                         // 如果在树的空白处点击

@@ -3,6 +3,7 @@ package com.dsbie.frontend.component;
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
+import com.dsbie.frontend.panel.JdbcConnectionJPanel;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
@@ -33,15 +34,30 @@ public class FrameJPopupMenu {
     private JPopupMenu rootPopupMenu;
     private JPopupMenu folderPopupMenu;
     private JPopupMenu tabbedPanePopupMenu;
+    private JPopupMenu connectionPopupMenu;
 
     private FrameJPopupMenu() {
         initRootPopupMenu();
         initFolderPopupMenu();
         initTabbedPanePopupMenu();
+        initConnectionPopupMenu();
     }
 
     public static FrameJPopupMenu getInstance() {
         return INSTANCE;
+    }
+
+    private void initConnectionPopupMenu() {
+        connectionPopupMenu = new JPopupMenu();
+        JMenuItem editItem = new JMenuItem("编辑");
+        editItem.setIcon(ImageLoadUtil.getInstance().getEditIcon());
+        editItem.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
+        connectionPopupMenu.add(editItem);
+
+        JMenuItem deleteDeleteItem = new JMenuItem("删除");
+        deleteDeleteItem.setIcon(ImageLoadUtil.getInstance().getDeleteIcon());
+        deleteDeleteItem.addActionListener(new DeleteTreeNodeAction());
+        connectionPopupMenu.add(deleteDeleteItem);
     }
 
     private void initTabbedPanePopupMenu() {
@@ -61,6 +77,16 @@ public class FrameJPopupMenu {
         rootNewFolderItem.setIcon(ImageLoadUtil.getInstance().getNewFolderIcon());
         rootNewFolderItem.addActionListener(new LeftTree.NewFolderAction());
         rootPopupMenu.add(rootNewFolderItem);
+
+        JMenu newJDBCConnection = new JMenu("新建JDBC连接");
+        newJDBCConnection.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
+
+        JMenuItem jMenuItem = new JMenuItem("Mysql");
+        jMenuItem.setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
+        jMenuItem.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
+        newJDBCConnection.add(jMenuItem);
+
+        rootPopupMenu.add(newJDBCConnection);
     }
 
     private void initFolderPopupMenu() {
@@ -118,11 +144,7 @@ public class FrameJPopupMenu {
                 if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.ROOT)) {
                     DialogUtil.showErrorDialog(Main.dsbieJFrame, "请先选中一个节点进行编辑!");
                     log.error("不允许重命名Root节点");
-                    try {
-                        throw new KToolException("不允许重命名Root节点");
-                    } catch (KToolException ex) {
-                        throw new RuntimeException(ex.getMessage(), ex);
-                    }
+                    throw new KToolException("不允许重命名Root节点");
                 }
 
                 String oldNodeName = currentTreeNode.getTreeEntity().getNodeName();
@@ -143,14 +165,7 @@ public class FrameJPopupMenu {
                             TreeEntity treeEntity = currentTreeNode.getTreeEntity();
                             treeEntity.setNodeName(result);
 
-                            JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor((JMenuItem) e.getSource());
-                            try {
-                                KToolsContext.getInstance().getApi(SystemApi.class).updateNode(treeEntity);
-                            } catch (KToolException ex) {
-                                DialogUtil.showErrorDialog(jFrame, ex.getMessage());
-                                log.error(ex.getMessage(), ex);
-                                throw new RuntimeException(ex);
-                            }
+                            KToolsContext.getInstance().getApi(SystemApi.class).updateNode(treeEntity);
 
                             SwingUtilities.invokeLater(() -> {
                                 currentTreeNode.setTreeEntity(treeEntity);
