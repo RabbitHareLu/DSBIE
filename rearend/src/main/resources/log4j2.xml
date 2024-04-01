@@ -9,7 +9,7 @@
         <property name="CONSOLE_LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} [%-5level] [%t] %l - %m%n</property>
 
         <!-- 定义日志存储的路径 -->
-        <property name="LOG_HOME" value="./.dsbie/logs"/>
+        <property name="LOG_HOME" value="${sys:user.home}/.dsbie/logs"/>
 <!--        mac 系统需要新建在用户跟目录下  否则无法运行-->
 <!--        <property name="LOG_HOME" value="~/dsbie_logs"/>-->
         <property name="LOG_FILE_NAME" value="dsbie"/>

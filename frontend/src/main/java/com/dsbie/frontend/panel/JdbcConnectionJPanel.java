@@ -372,10 +372,11 @@ public class JdbcConnectionJPanel extends JPanel {
             dbTypeBox.add(dbTypeLabel);
             dbTypeBox.add(Box.createHorizontalStrut(30));
             dbTypeComboBox = new JComboBox<>();
-            dbTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
-                    "Mysql",
-                    "Oracle"
-            }));
+
+            Vector<String> typeVector = new Vector<>();
+            typeVector.add("Mysql");
+            typeVector.add("Oracle");
+            dbTypeComboBox.setModel(new DefaultComboBoxModel<>(typeVector));
             dbTypeComboBox.addActionListener(e -> {
                 String itemAt = dbTypeComboBox.getItemAt(dbTypeComboBox.getSelectedIndex());
                 if (Objects.equals(itemAt, "Mysql")) {
