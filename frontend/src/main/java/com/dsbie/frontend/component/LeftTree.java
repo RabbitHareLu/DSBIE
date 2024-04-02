@@ -110,8 +110,8 @@ public class LeftTree {
                         } else if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.SCHEMA)) {
                             frameJPopupMenu.getSchemaPopupMenu().show(jTree, x, y);
                         } else if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.TABLE)) {
-//                            frameJPopupMenu.getTablePopupMenu().show(jTree, x, y);
-                        } else {
+                            frameJPopupMenu.getTablePopupMenu().show(jTree, x, y);
+                        } else if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.CONNECTION)) {
                             frameJPopupMenu.getConnectionPopupMenu().show(jTree, x, y);
                         }
                     } else {

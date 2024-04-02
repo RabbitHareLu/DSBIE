@@ -40,6 +40,7 @@ public class FrameJPopupMenu {
     private JPopupMenu tabbedPanePopupMenu;
     private JPopupMenu connectionPopupMenu;
     private JPopupMenu schemaPopupMenu;
+    private JPopupMenu tablePopupMenu;
 
     private FrameJPopupMenu() {
         initRootPopupMenu();
@@ -47,10 +48,24 @@ public class FrameJPopupMenu {
         initTabbedPanePopupMenu();
         initConnectionPopupMenu();
         initSchemaPopupMenu();
+        initTablePopupMenu();
     }
 
     public static FrameJPopupMenu getInstance() {
         return INSTANCE;
+    }
+
+    private void initTablePopupMenu() {
+        tablePopupMenu = new JPopupMenu();
+        JMenuItem importItem = new JMenuItem("导入");
+        importItem.setIcon(ImageLoadUtil.getInstance().getImportIcon());
+//        importItem.addActionListener(new RefreshSchemaNodeAction());
+        tablePopupMenu.add(importItem);
+
+        JMenuItem exportItem = new JMenuItem("导出");
+        exportItem.setIcon(ImageLoadUtil.getInstance().getExportIcon());
+//        exportItem.addActionListener(new RefreshSchemaNodeAction());
+        tablePopupMenu.add(exportItem);
     }
 
     private void initSchemaPopupMenu() {
