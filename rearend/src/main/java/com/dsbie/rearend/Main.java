@@ -18,8 +18,9 @@ public class Main {
         map.put("password", "Pqv]!/T)-1p");
 
         dataSourceApi.conn("111", "MYSQL", map);
-//        List<String> list = dataSourceApi.selectAllSchema("111");
-        List<String> list = dataSourceApi.selectAllTable("111", "kdm_sys");
+        List<String> list = dataSourceApi.selectAllSchema("111");
+//        List<String> list = dataSourceApi.selectAllTable("111", "performance_schema");
+//        List<String> list = dataSourceApi.selectAllTable("111", "kdm_sys");
         list.forEach(System.out::println);
 
     }

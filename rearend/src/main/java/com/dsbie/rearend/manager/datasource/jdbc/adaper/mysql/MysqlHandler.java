@@ -3,15 +3,18 @@ package com.dsbie.rearend.manager.datasource.jdbc.adaper.mysql;
 import com.dsbie.rearend.common.utils.StreamUtil;
 import com.dsbie.rearend.exception.KToolException;
 import com.dsbie.rearend.manager.datasource.jdbc.AbstractJdbcHandler;
+import com.dsbie.rearend.manager.datasource.jdbc.model.TableColumn;
+import com.dsbie.rearend.manager.datasource.jdbc.model.TableMetadata;
 import com.mysql.cj.MysqlType;
 import com.mysql.cj.jdbc.Driver;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLType;
+import java.sql.*;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * mysql数据源处理器
@@ -31,7 +34,58 @@ public class MysqlHandler extends AbstractJdbcHandler {
         ) {
             return StreamUtil.buildStream(schemas)
                     .map(map -> String.valueOf(map.get("TABLE_CAT")))
+                    .filter(schemaName -> !"information_schema".equalsIgnoreCase(schemaName) && !"performance_schema".equalsIgnoreCase(schemaName))
                     .toList();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<String> selectAllTable(String schema) throws KToolException {
+        try (Connection connection = getDataSource().getConnection();
+             ResultSet tables = connection.getMetaData().getTables(schema, null, "%", new String[]{"TABLE"})
+        ) {
+            return StreamUtil.buildStream(tables)
+                    .map(map -> String.valueOf(map.get("TABLE_NAME")))
+                    .toList();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public TableMetadata selectTableMetadata(String schema, String tableName) throws KToolException {
+        TableMetadata metadata = new TableMetadata();
+        metadata.setSchema(schema);
+        metadata.setTableName(tableName);
+
+        try (Connection connection = getDataSource().getConnection();
+             ResultSet primaryKeys = connection.getMetaData().getPrimaryKeys(schema, null, tableName);
+             ResultSet columns = connection.getMetaData().getColumns(schema, null, tableName, "%")
+        ) {
+            // 获取主键信息的结果集
+            List<String> primaryKeyList = StreamUtil.buildStream(primaryKeys)
+                    .map(map -> String.valueOf(map.get("COLUMN_NAME")))
+                    .toList();
+            // 处理字段
+            Map<String, TableColumn> columnMap = StreamUtil.buildStream(columns).map(column -> {
+                TableColumn columnTemp = new TableColumn();
+                columnTemp.setName(String.valueOf(column.get("COLUMN_NAME")));
+                columnTemp.setDataType(getSqlTypeByJdbcType(String.valueOf(column.get("TYPE_NAME"))));
+                columnTemp.setPrimaryKey(primaryKeyList.contains(columnTemp.getName()));
+                columnTemp.setNullable(ResultSetMetaData.columnNullable == Integer.parseInt(String.valueOf(column.get("NULLABLE"))));
+                columnTemp.setLength(Integer.parseInt(String.valueOf(column.get("COLUMN_SIZE"))));
+                columnTemp.setPrecision(Integer.parseInt(String.valueOf(column.get("DECIMAL_DIGITS"))));
+                return columnTemp;
+            }).collect(Collectors.toMap(TableColumn::getName, Function.identity(), (tableColumn, tableColumn2) -> {
+                throw new RuntimeException("列名冲突！");
+            }, LinkedHashMap::new));
+
+            // 赋值给元数据
+            metadata.setColumns(columnMap);
+            // 返回结果
+            return metadata;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
