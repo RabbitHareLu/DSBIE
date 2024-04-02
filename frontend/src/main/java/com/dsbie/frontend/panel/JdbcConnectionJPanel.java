@@ -1,7 +1,6 @@
 package com.dsbie.frontend.panel;
 
 import com.dsbie.frontend.Main;
-import com.dsbie.frontend.component.FrameJPopupMenu;
 import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.component.LeftTreeNode;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
@@ -9,6 +8,7 @@ import com.dsbie.frontend.frame.DsbieJFrame;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.ComponentVerifierUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
+import com.dsbie.frontend.utils.TabbedPaneUtil;
 import com.dsbie.rearend.KToolsContext;
 import com.dsbie.rearend.api.DataSourceApi;
 import com.dsbie.rearend.api.SystemApi;
@@ -36,10 +36,7 @@ import java.awt.event.MouseEvent;
 import java.io.Serial;
 import java.util.List;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-
-import static com.formdev.flatlaf.FlatClientProperties.*;
 
 /**
  * @author lsl
@@ -353,7 +350,7 @@ public class JdbcConnectionJPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             CompletableFutureUtil.submit(() -> {
                 JMenuItem source = (JMenuItem) e.getSource();
-                initTabbedPane();
+                TabbedPaneUtil.initTabbedPane();
                 JdbcConnectionJPanel jdbcConnectionJPanel = null;
 
                 LeftTree instance = LeftTree.getInstance();
@@ -381,40 +378,6 @@ public class JdbcConnectionJPanel extends JPanel {
                     });
                 }
             });
-        }
-
-        private static void initTabbedPane() {
-            if (Objects.isNull(DsbieJFrame.closableTabsTabbedPane)) {
-                JTabbedPane tabbedPane = new JTabbedPane();
-                tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSABLE, true);
-                tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "Close");
-                tabbedPane.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
-                tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_CALLBACK,
-                        (BiConsumer<JTabbedPane, Integer>) (tabPane, tabIndex) -> {
-                            int tabCount = tabbedPane.getTabCount();
-                            if (tabCount <= 1) {
-                                SwingUtilities.invokeLater(() -> DsbieJFrame.rootJSplitPane.setRightComponent(DsbieJFrame.logoLabel));
-                            }
-                            SwingUtilities.invokeLater(() -> tabbedPane.remove(tabIndex));
-                        });
-                tabbedPane.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-                        if (SwingUtilities.isRightMouseButton(e)) {
-                            int x = e.getX();
-                            int y = e.getY();
-                            for (int i = 0; i < tabbedPane.getTabCount(); i++) {
-                                Rectangle boundsAt = tabbedPane.getBoundsAt(i);
-                                if (y < (boundsAt.getY() + boundsAt.height) && x < (boundsAt.getX() + boundsAt.getWidth())) {
-                                    FrameJPopupMenu.getInstance().getTabbedPanePopupMenu().show(tabbedPane, x, y);
-                                }
-                            }
-                        }
-                    }
-                });
-
-                DsbieJFrame.closableTabsTabbedPane = tabbedPane;
-            }
         }
     }
 

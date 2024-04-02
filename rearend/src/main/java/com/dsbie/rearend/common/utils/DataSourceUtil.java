@@ -16,7 +16,7 @@ public class DataSourceUtil {
         hikariDataSource.setJdbcUrl(jdbcConfig.getJdbcUrl());
         hikariDataSource.setUsername(jdbcConfig.getUsername());
         hikariDataSource.setPassword(jdbcConfig.getPassword());
-        hikariDataSource.setMinimumIdle(1);
+        hikariDataSource.setMinimumIdle(5);
         hikariDataSource.setMaximumPoolSize(10);
         hikariDataSource.setMaxLifetime(1800000);
         hikariDataSource.setKeepaliveTime(30000);

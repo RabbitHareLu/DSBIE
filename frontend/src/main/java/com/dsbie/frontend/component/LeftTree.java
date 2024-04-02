@@ -7,6 +7,7 @@ import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
 import com.dsbie.rearend.api.SystemApi;
+import com.dsbie.rearend.common.model.Pair;
 import com.dsbie.rearend.common.utils.CollectionUtil;
 import com.dsbie.rearend.common.utils.StringUtil;
 import com.dsbie.rearend.exception.KToolException;
@@ -204,6 +205,23 @@ public class LeftTree {
 
     public LeftTreeNode getCurrentTreeNode(TreePath treePath) {
         return (LeftTreeNode) treePath.getLastPathComponent();
+    }
+
+    public Pair<String, Boolean> buildTreeNodePath(LeftTreeNode currentTreeNode) {
+        LeftTreeNode parent = (LeftTreeNode) currentTreeNode.getParent();
+        if (!Objects.equals(parent.getUserObject(), LeftTreeNodeType.ROOT)) {
+            Pair<String, Boolean> pair = buildTreeNodePath(parent);
+            if (pair.getValue()) {
+                if (Objects.equals(parent.getTreeEntity().getNodeType(), LeftTreeNodeType.CONNECTION)) {
+                    return new Pair<>(pair.getKey(), false);
+                } else {
+                    return new Pair<>(pair.getKey() + "/" + currentTreeNode.getUserObject(), true);
+                }
+            } else {
+                return pair;
+            }
+        }
+        return new Pair<>((String) currentTreeNode.getUserObject(), true);
     }
 
     public void buildTreeNodePath(List<String> list, TreePath selectionPath) {

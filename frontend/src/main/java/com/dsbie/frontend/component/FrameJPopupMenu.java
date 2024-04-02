@@ -3,6 +3,7 @@ package com.dsbie.frontend.component;
 import com.dsbie.frontend.Main;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
+import com.dsbie.frontend.panel.DataImportJPanel;
 import com.dsbie.frontend.panel.JdbcConnectionJPanel;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.DialogUtil;
@@ -59,7 +60,7 @@ public class FrameJPopupMenu {
         tablePopupMenu = new JPopupMenu();
         JMenuItem importItem = new JMenuItem("数据导入");
         importItem.setIcon(ImageLoadUtil.getInstance().getImportIcon());
-//        importItem.addActionListener(new RefreshSchemaNodeAction());
+        importItem.addActionListener(new DataImportJPanel.CreateDataImportJPanelAction());
         tablePopupMenu.add(importItem);
 
         JMenuItem exportItem = new JMenuItem("数据导出");
@@ -79,6 +80,11 @@ public class FrameJPopupMenu {
         refreshItem.setIcon(ImageLoadUtil.getInstance().getRefreshIcon());
         refreshItem.addActionListener(new RefreshSchemaNodeAction());
         schemaPopupMenu.add(refreshItem);
+
+        JMenuItem importItem = new JMenuItem("数据导入");
+        importItem.setIcon(ImageLoadUtil.getInstance().getImportIcon());
+        importItem.addActionListener(new DataImportJPanel.CreateDataImportJPanelAction());
+        schemaPopupMenu.add(importItem);
 
         JMenuItem exportItem = new JMenuItem("数据导出");
         exportItem.setIcon(ImageLoadUtil.getInstance().getExportIcon());
@@ -107,6 +113,11 @@ public class FrameJPopupMenu {
         editItem.setIcon(ImageLoadUtil.getInstance().getEditIcon());
         editItem.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
         connectionPopupMenu.add(editItem);
+
+        JMenuItem importItem = new JMenuItem("数据导入");
+        importItem.setIcon(ImageLoadUtil.getInstance().getImportIcon());
+        importItem.addActionListener(new DataImportJPanel.CreateDataImportJPanelAction());
+        connectionPopupMenu.add(importItem);
 
         JMenuItem deleteDeleteItem = new JMenuItem("删除");
         deleteDeleteItem.setIcon(ImageLoadUtil.getInstance().getDeleteIcon());
