@@ -15,7 +15,7 @@ import java.util.Properties;
  */
 public class OracleHandler extends AbstractJdbcHandler {
 
-    protected OracleHandler(Properties properties) throws KToolException {
+    public OracleHandler(Properties properties) throws KToolException {
         super(properties);
     }
 

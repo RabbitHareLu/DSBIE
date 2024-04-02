@@ -15,7 +15,7 @@ import java.util.Properties;
  */
 public class MysqlHandler extends AbstractJdbcHandler {
 
-    protected MysqlHandler(Properties properties) throws KToolException {
+    public MysqlHandler(Properties properties) throws KToolException {
         super(properties);
     }
 
