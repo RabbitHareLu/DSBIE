@@ -57,10 +57,12 @@ public class DataImportJPanel extends JPanel {
      * 文件路径和sql输入框
      */
     private JTextArea filePathSqlTextArea;
+    private JTextArea logTextArea;
 
     private JTabbedPane tabbedPane;
     private RegularJPanel regularJPanel;
     private AdvancedJPanel advancedJPanel;
+    private LogJPanel logJPanel;
 
     private JTable table;
     private DefaultTableModel defaultTableModel;
@@ -85,10 +87,12 @@ public class DataImportJPanel extends JPanel {
         box.add(Box.createHorizontalStrut(100));
         regularJPanel = new RegularJPanel();
         advancedJPanel = new AdvancedJPanel();
+        logJPanel = new LogJPanel();
 //        addDbTypeComboBoxActionListener();
         tabbedPane = new JTabbedPane();
         tabbedPane.addTab("常规", null, regularJPanel, "常规");
         tabbedPane.addTab("高级", null, advancedJPanel, "高级");
+        tabbedPane.addTab("日志", null, logJPanel, "日志");
         box.add(tabbedPane);
         box.add(Box.createHorizontalStrut(100));
         return box;
@@ -343,6 +347,57 @@ public class DataImportJPanel extends JPanel {
             horizontalBox.add(toolBar);
 
             add(horizontalBox, BorderLayout.NORTH);
+        }
+    }
+
+    @Getter
+    @Setter
+    private class LogJPanel extends JPanel {
+        public LogJPanel() {
+            setLayout(new BorderLayout());
+            Box horizontalBox = Box.createHorizontalBox();
+
+            logTextArea = new JTextArea();
+            logTextArea.setRows(10);
+            logTextArea.setColumns(10);
+            logTextArea.setWrapStyleWord(true);
+            JScrollPane logJScrollPane = new JScrollPane();
+            logJScrollPane.setViewportView(logTextArea);
+            horizontalBox.add(logJScrollPane);
+
+            JToolBar toolBar = new JToolBar();
+            toolBar.setOrientation(SwingConstants.VERTICAL);
+            JToggleButton lineWrapButton = new JToggleButton();
+            lineWrapButton.setIcon(ImageLoadUtil.getInstance().getLineWrapIcon());
+            lineWrapButton.addActionListener(e -> logTextArea.setLineWrap(!logTextArea.getLineWrap()));
+            toolBar.add(lineWrapButton);
+
+            /*JToggleButton latestButton = new JToggleButton();
+            latestButton.setIcon(ImageLoadUtil.getInstance().getLatestIcon());
+            logJScrollPane.setAutoscrolls(false);
+            latestButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    log.info("{}", logJScrollPane.getAutoscrolls());
+                    if (logJScrollPane.getAutoscrolls()) {
+                        logJScrollPane.setAutoscrolls(false);
+                    } else {
+                        logJScrollPane.setAutoscrolls(true);
+                    }
+
+                }
+            });
+            toolBar.add(latestButton);*/
+
+            JButton clearButton = new JButton();
+            clearButton.setIcon(ImageLoadUtil.getInstance().getDeleteIcon());
+            clearButton.addActionListener(e -> logTextArea.setText(""));
+            toolBar.add(clearButton);
+
+            toolBar.add(Box.createVerticalGlue());
+            horizontalBox.add(toolBar);
+
+            add(horizontalBox, BorderLayout.CENTER);
         }
     }
 

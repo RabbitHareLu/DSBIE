@@ -38,6 +38,8 @@ public class ImageLoadUtil {
     private ImageIcon importIcon = null;
     private ImageIcon exportIcon = null;
     private ImageIcon tableStructExportIcon = null;
+    private ImageIcon lineWrapIcon = null;
+    private ImageIcon latestIcon = null;
 
     private ImageLoadUtil() {
         logoIcon = buildIcon("images/logo.svg");
@@ -63,6 +65,8 @@ public class ImageLoadUtil {
         importIcon = buildIcon("images/import.svg");
         exportIcon = buildIcon("images/export.svg");
         tableStructExportIcon = buildIcon("images/tableStructExport.svg");
+        lineWrapIcon = buildIcon("images/lineWrap.svg");
+        latestIcon = buildIcon("images/latest.svg");
     }
 
     public static ImageLoadUtil getInstance() {
