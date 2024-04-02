@@ -57,15 +57,20 @@ public class FrameJPopupMenu {
 
     private void initTablePopupMenu() {
         tablePopupMenu = new JPopupMenu();
-        JMenuItem importItem = new JMenuItem("导入");
+        JMenuItem importItem = new JMenuItem("数据导入");
         importItem.setIcon(ImageLoadUtil.getInstance().getImportIcon());
 //        importItem.addActionListener(new RefreshSchemaNodeAction());
         tablePopupMenu.add(importItem);
 
-        JMenuItem exportItem = new JMenuItem("导出");
+        JMenuItem exportItem = new JMenuItem("数据导出");
         exportItem.setIcon(ImageLoadUtil.getInstance().getExportIcon());
 //        exportItem.addActionListener(new RefreshSchemaNodeAction());
         tablePopupMenu.add(exportItem);
+
+        JMenuItem tableStructExportItem = new JMenuItem("表结构导出");
+        tableStructExportItem.setIcon(ImageLoadUtil.getInstance().getTableStructExportIcon());
+//        exportItem.addActionListener(new RefreshSchemaNodeAction());
+        tablePopupMenu.add(tableStructExportItem);
     }
 
     private void initSchemaPopupMenu() {
@@ -74,6 +79,16 @@ public class FrameJPopupMenu {
         refreshItem.setIcon(ImageLoadUtil.getInstance().getRefreshIcon());
         refreshItem.addActionListener(new RefreshSchemaNodeAction());
         schemaPopupMenu.add(refreshItem);
+
+        JMenuItem exportItem = new JMenuItem("数据导出");
+        exportItem.setIcon(ImageLoadUtil.getInstance().getExportIcon());
+//        exportItem.addActionListener(new RefreshSchemaNodeAction());
+        schemaPopupMenu.add(exportItem);
+
+        JMenuItem tableStructExportItem = new JMenuItem("表结构导出");
+        tableStructExportItem.setIcon(ImageLoadUtil.getInstance().getTableStructExportIcon());
+//        exportItem.addActionListener(new RefreshSchemaNodeAction());
+        schemaPopupMenu.add(tableStructExportItem);
 
         JMenuItem deleteDeleteItem = new JMenuItem("删除");
         deleteDeleteItem.setIcon(ImageLoadUtil.getInstance().getDeleteIcon());
