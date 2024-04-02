@@ -34,6 +34,7 @@ public class ImageLoadUtil {
     private ImageIcon addRowIcon = null;
     private ImageIcon deleteRowIcon = null;
     private ImageIcon editIcon = null;
+    private ImageIcon schemaIcon = null;
 
     private ImageLoadUtil() {
         logoIcon = buildIcon("images/logo.svg");
@@ -55,6 +56,7 @@ public class ImageLoadUtil {
         addRowIcon = buildIcon("images/addRow.svg");
         deleteRowIcon = buildIcon("images/deleteRow.svg");
         editIcon = buildIcon("images/edit.svg");
+        schemaIcon = buildIcon("images/schema.svg");
     }
 
     public static ImageLoadUtil getInstance() {

@@ -54,14 +54,14 @@ public class LeftTree {
         defaultTreeModel = new DefaultTreeModel(root);
 
         jTree = new JTree(defaultTreeModel);
-        jTree.setDragEnabled(true);
-        jTree.setDropMode(DropMode.ON_OR_INSERT);
+//        jTree.setDragEnabled(true);
+//        jTree.setDropMode(DropMode.ON_OR_INSERT);
         jTree.setShowsRootHandles(true);
         jTree.setCellRenderer(new TreeNodeRenderer());
         jTree.setRootVisible(false);
 //        jTree.setToggleClickCount(0);
         jTree.addMouseListener(new TreeMouseAdapter());
-        jTree.setTransferHandler(new DummyTransferHandler());
+//        jTree.setTransferHandler(new DummyTransferHandler());
     }
 
     public static LeftTree getInstance() {
@@ -108,7 +108,7 @@ public class LeftTree {
                         if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.FOLDER)) {
                             frameJPopupMenu.getFolderPopupMenu().show(jTree, x, y);
                         } else if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.SCHEMA)) {
-//                            frameJPopupMenu.getSchemaPopupMenu().show(jTree, x, y);
+                            frameJPopupMenu.getSchemaPopupMenu().show(jTree, x, y);
                         } else if (Objects.equals(currentTreeNode.getTreeEntity().getNodeType(), LeftTreeNodeType.TABLE)) {
 //                            frameJPopupMenu.getTablePopupMenu().show(jTree, x, y);
                         } else {
@@ -156,7 +156,9 @@ public class LeftTree {
                         }
                     }
                     case LeftTreeNodeType.CONNECTION -> setIcon(ImageLoadUtil.getInstance().getNewJdbcIcon());
-                    default -> log.info("default");
+                    case LeftTreeNodeType.SCHEMA -> setIcon(ImageLoadUtil.getInstance().getSchemaIcon());
+                    case LeftTreeNodeType.TABLE -> setIcon(ImageLoadUtil.getInstance().getTableIcon());
+//                    default -> log.info("default");
                 }
             }
             return this;
@@ -183,6 +185,11 @@ public class LeftTree {
      */
     public Boolean isNodeDescendant(LeftTreeNode leftTreeNode) {
         return ((LeftTreeNode) defaultTreeModel.getRoot()).isNodeDescendant(leftTreeNode);
+    }
+
+    public void deleteTreeChildNode(LeftTreeNode currentTreeNode) {
+        currentTreeNode.removeAllChildren();
+        getDefaultTreeModel().nodeStructureChanged(currentTreeNode);
     }
 
     public TreePath getCurrentTreePath() {
@@ -225,20 +232,10 @@ public class LeftTree {
     public void expandTreeNode(TreePath selectionPath) {
         if (Objects.nonNull(selectionPath)) {
             if (!jTree.isExpanded(selectionPath)) {
-                jTree.expandPath(selectionPath);
+                SwingUtilities.invokeLater(() -> jTree.expandPath(selectionPath));
             }
         }
     }
-
-    /*public boolean isNodeValid(TreeEntity treeEntity) {
-        String nodePath = treeEntity.getNodePath();
-        List<String> split = StringUtil.split(nodePath, "/");
-        TreeModel treeModel = getTreeModel();
-        LeftTreeNode root = (LeftTreeNode) treeModel.getRoot();
-        root.isNodeChild()
-
-        return false;
-    }*/
 
     public static class NewFolderAction implements ActionListener {
         @Override

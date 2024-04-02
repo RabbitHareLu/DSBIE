@@ -8,9 +8,11 @@ import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.DialogUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.rearend.KToolsContext;
+import com.dsbie.rearend.api.DataSourceApi;
 import com.dsbie.rearend.api.SystemApi;
 import com.dsbie.rearend.common.utils.StringUtil;
 import com.dsbie.rearend.exception.KToolException;
+import com.dsbie.rearend.manager.uid.UidKey;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -35,20 +39,40 @@ public class FrameJPopupMenu {
     private JPopupMenu folderPopupMenu;
     private JPopupMenu tabbedPanePopupMenu;
     private JPopupMenu connectionPopupMenu;
+    private JPopupMenu schemaPopupMenu;
 
     private FrameJPopupMenu() {
         initRootPopupMenu();
         initFolderPopupMenu();
         initTabbedPanePopupMenu();
         initConnectionPopupMenu();
+        initSchemaPopupMenu();
     }
 
     public static FrameJPopupMenu getInstance() {
         return INSTANCE;
     }
 
+    private void initSchemaPopupMenu() {
+        schemaPopupMenu = new JPopupMenu();
+        JMenuItem refreshItem = new JMenuItem("刷新");
+        refreshItem.setIcon(ImageLoadUtil.getInstance().getRefreshIcon());
+        refreshItem.addActionListener(new RefreshSchemaNodeAction());
+        schemaPopupMenu.add(refreshItem);
+
+        JMenuItem deleteDeleteItem = new JMenuItem("删除");
+        deleteDeleteItem.setIcon(ImageLoadUtil.getInstance().getDeleteIcon());
+        deleteDeleteItem.addActionListener(new DeleteTreeNodeAction());
+        schemaPopupMenu.add(deleteDeleteItem);
+    }
+
     private void initConnectionPopupMenu() {
         connectionPopupMenu = new JPopupMenu();
+        JMenuItem refreshItem = new JMenuItem("刷新");
+        refreshItem.setIcon(ImageLoadUtil.getInstance().getRefreshIcon());
+        refreshItem.addActionListener(new RefreshConnectionNodeAction());
+        connectionPopupMenu.add(refreshItem);
+
         JMenuItem editItem = new JMenuItem("编辑");
         editItem.setIcon(ImageLoadUtil.getInstance().getEditIcon());
         editItem.addActionListener(new JdbcConnectionJPanel.CreateJdbcConnectionJPanelAction());
@@ -110,6 +134,97 @@ public class FrameJPopupMenu {
     }
 
     @Slf4j
+    private static class RefreshSchemaNodeAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            CompletableFutureUtil.submit(() -> {
+                LeftTree instance = LeftTree.getInstance();
+                TreePath selectionPath = instance.getCurrentTreePath();
+                LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
+                LeftTreeNode jdbcNode = instance.getCurrentTreeNode(new TreePath(currentTreeNode.getParent()));
+                TreeEntity jdbcTreeEntity = jdbcNode.getTreeEntity();
+                TreeEntity treeEntity = currentTreeNode.getTreeEntity();
+                String dbType = jdbcTreeEntity.getNodeInfo().get("dbType");
+
+                KToolsContext.getInstance().getApi(DataSourceApi.class).conn(String.valueOf(jdbcTreeEntity.getId()), dbType, jdbcTreeEntity.getNodeInfo());
+                if (currentTreeNode.getChildCount() > 0) {
+                    KToolsContext.getInstance().getApi(SystemApi.class).deleteChildNode(treeEntity);
+                    instance.deleteTreeChildNode(currentTreeNode);
+                }
+
+                List<String> tableNameList = KToolsContext.getInstance().getApi(DataSourceApi.class)
+                        .selectAllTable(String.valueOf(jdbcNode.getTreeEntity().getId()), treeEntity.getNodeName());
+
+                for (String tableName : tableNameList) {
+                    TreeEntity newTreeEntity = new TreeEntity();
+                    newTreeEntity.setId(KToolsContext.getInstance().getIdGenerator().getId(UidKey.TREE));
+                    newTreeEntity.setParentNodeId(treeEntity.getId());
+                    newTreeEntity.setNodeName(tableName);
+                    newTreeEntity.setNodeType(LeftTreeNodeType.TABLE);
+                    List<String> nodePathList = new ArrayList<>();
+                    instance.buildTreeNodePath(nodePathList, selectionPath);
+                    newTreeEntity.setNodePath(instance.getNodePathString(nodePathList));
+                    newTreeEntity.setNodeInfo(null);
+                    newTreeEntity.setChild(null);
+
+                    KToolsContext.getInstance().getApi(SystemApi.class).addNode(newTreeEntity);
+
+                    LeftTreeNode treeNode = new LeftTreeNode(newTreeEntity);
+                    currentTreeNode.add(treeNode);
+                }
+                SwingUtilities.invokeLater(() -> {
+                    instance.getDefaultTreeModel().nodeStructureChanged(currentTreeNode);
+                    instance.expandTreeNode(selectionPath);
+                });
+            });
+        }
+    }
+
+    @Slf4j
+    private static class RefreshConnectionNodeAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            CompletableFutureUtil.submit(() -> {
+                LeftTree instance = LeftTree.getInstance();
+                TreePath selectionPath = instance.getCurrentTreePath();
+                LeftTreeNode currentTreeNode = instance.getCurrentTreeNode(selectionPath);
+                TreeEntity currentTreeEntity = currentTreeNode.getTreeEntity();
+                String dbType = currentTreeEntity.getNodeInfo().get("dbType");
+
+                KToolsContext.getInstance().getApi(DataSourceApi.class).conn(String.valueOf(currentTreeEntity.getId()), dbType, currentTreeEntity.getNodeInfo());
+                if (currentTreeNode.getChildCount() > 0) {
+                    KToolsContext.getInstance().getApi(SystemApi.class).deleteChildNode(currentTreeEntity);
+                    instance.deleteTreeChildNode(currentTreeNode);
+                }
+                List<String> schemaList = KToolsContext.getInstance().getApi(DataSourceApi.class).selectAllSchema(String.valueOf(currentTreeEntity.getId()));
+                for (String schema : schemaList) {
+                    TreeEntity newTreeEntity = new TreeEntity();
+                    newTreeEntity.setId(KToolsContext.getInstance().getIdGenerator().getId(UidKey.TREE));
+                    newTreeEntity.setParentNodeId(currentTreeEntity.getId());
+                    newTreeEntity.setNodeName(schema);
+                    newTreeEntity.setNodeType(LeftTreeNodeType.SCHEMA);
+                    newTreeEntity.setNodeComment(null);
+
+                    List<String> nodePathList = new ArrayList<>();
+                    instance.buildTreeNodePath(nodePathList, selectionPath);
+                    newTreeEntity.setNodePath(instance.getNodePathString(nodePathList));
+                    newTreeEntity.setNodeInfo(null);
+                    newTreeEntity.setChild(null);
+
+                    KToolsContext.getInstance().getApi(SystemApi.class).addNode(newTreeEntity);
+                    LeftTreeNode treeNode = new LeftTreeNode(newTreeEntity);
+
+                    currentTreeNode.add(treeNode);
+                }
+                SwingUtilities.invokeLater(() -> {
+                    instance.getDefaultTreeModel().nodeStructureChanged(currentTreeNode);
+                    instance.expandTreeNode(selectionPath);
+                });
+            });
+        }
+    }
+
+    @Slf4j
     private static class DeleteTreeNodeAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -153,8 +268,8 @@ public class FrameJPopupMenu {
 
                 Object o = JOptionPane.showInputDialog(
                         Main.dsbieJFrame,
-                        "目录名称",
-                        "重命名文件夹",
+                        "节点名称",
+                        "重命名节点",
                         JOptionPane.INFORMATION_MESSAGE,
                         null, null, oldNodeName
                 );
@@ -162,7 +277,7 @@ public class FrameJPopupMenu {
                 if (Objects.nonNull(o)) {
                     String result = String.valueOf(o);
                     if (StringUtil.isNotBlank(result)) {
-                        log.info("重命名文件夹: {} -> {}", oldNodeName, result);
+                        log.info("重命名节点: {} -> {}", oldNodeName, result);
                         if (!Objects.equals(oldNodeName, result)) {
                             TreeEntity treeEntity = currentTreeNode.getTreeEntity();
                             treeEntity.setNodeName(result);
