@@ -465,6 +465,7 @@ public class JdbcConnectionJPanel extends JPanel {
             passwordInputField = new JPasswordField();
             passwordInputField.putClientProperty(FlatClientProperties.STYLE, "showRevealButton: true");
             passwordInputField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+            passwordInputField.putClientProperty("JPasswordField.cutCopyAllowed", true);
             passwordBox.add(passwordInputField);
             passwordLabel.setPreferredSize(dimension);
 
