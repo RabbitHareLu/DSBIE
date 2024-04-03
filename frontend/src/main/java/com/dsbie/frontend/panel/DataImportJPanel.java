@@ -7,6 +7,8 @@ import com.dsbie.frontend.frame.DsbieJFrame;
 import com.dsbie.frontend.utils.CompletableFutureUtil;
 import com.dsbie.frontend.utils.ImageLoadUtil;
 import com.dsbie.frontend.utils.TabbedPaneUtil;
+import com.dsbie.rearend.KToolsContext;
+import com.dsbie.rearend.api.DataSourceApi;
 import com.dsbie.rearend.common.model.Pair;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 import lombok.Getter;
@@ -18,11 +20,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.Serial;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Vector;
 
@@ -96,7 +96,7 @@ public class DataImportJPanel extends JPanel {
         Box northBox = initNorthBox();
         Box southBox = initSouthBox();
 
-        add(northBox, BorderLayout.NORTH);
+        add(northBox, BorderLayout.CENTER);
         add(southBox, BorderLayout.SOUTH);
     }
 
@@ -186,8 +186,9 @@ public class DataImportJPanel extends JPanel {
 
             Pair<String, Boolean> pair = LeftTree.getInstance().buildTreeNodePath(currentTreeNode);
             log.info("当前选择的导入数据源为: {}", pair.getKey());
-            Vector<String> connectionVector = new Vector<>();
-            connectionVector.add(pair.getKey());
+
+            Map<String, TreeEntity> dataSourceMap = KToolsContext.getInstance().getApi(DataSourceApi.class).selectAllDataSource();
+            Vector<String> connectionVector = new Vector<>(dataSourceMap.keySet());
 
             DefaultComboBoxModel<String> connectionComboBoxModel = new DefaultComboBoxModel<>(connectionVector);
             connectionComboBox.setModel(connectionComboBoxModel);
@@ -316,18 +317,17 @@ public class DataImportJPanel extends JPanel {
                                 sourceSchemaTableBox.add(sourceTableComboBox);
 
                                 SwingUtilities.invokeLater(() -> {
-                                    centerVertical.add(sourceConnectionBox, 0);
-                                    centerVertical.add(Box.createVerticalStrut(30), 1);
-                                    centerVertical.add(sourceSchemaTableBox, 2);
-                                    centerVertical.add(Box.createVerticalStrut(30), 3);
-                                    verticalBox.add(centerVertical);
+                                    verticalBox.add(sourceConnectionBox, -1);
+                                    verticalBox.add(Box.createVerticalStrut(30), -1);
+                                    verticalBox.add(sourceSchemaTableBox, -1);
+                                    verticalBox.add(Box.createVerticalStrut(30), -1);
+                                    add(centerVertical, BorderLayout.CENTER);
                                     centerVertical.revalidate();
                                 });
                             } else if (Objects.equals(oldImportType, "SQL")) {
                                 SwingUtilities.invokeLater(() -> {
-                                    int componentCount = centerVertical.getComponentCount();
-                                    for (int i = 0; i < componentCount - 1; i++) {
-                                        centerVertical.remove(0);
+                                    for (int i = 0; i < 4; i++) {
+                                        verticalBox.remove(verticalBox.getComponentCount() - 1);
                                     }
                                     centerVertical.revalidate();
                                 });
@@ -427,7 +427,7 @@ public class DataImportJPanel extends JPanel {
             toolBar.add(Box.createVerticalGlue());
             horizontalBox.add(toolBar);
 
-            add(horizontalBox, BorderLayout.NORTH);
+            add(horizontalBox, BorderLayout.CENTER);
         }
     }
 
@@ -439,8 +439,6 @@ public class DataImportJPanel extends JPanel {
             Box horizontalBox = Box.createHorizontalBox();
 
             logTextArea = new JTextArea();
-            logTextArea.setRows(10);
-            logTextArea.setColumns(10);
             logTextArea.setWrapStyleWord(true);
             JScrollPane logJScrollPane = new JScrollPane();
             logJScrollPane.setViewportView(logTextArea);
@@ -460,6 +458,24 @@ public class DataImportJPanel extends JPanel {
 
             toolBar.add(Box.createVerticalGlue());
             horizontalBox.add(toolBar);
+
+            addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    // 获取 Panel 的可用大小
+                    Dimension size = getSize();
+                    // 获取 Panel 内部的 Insets（边距）
+                    Insets insets = getInsets();
+                    // 计算可用空间，减去边距
+                    int availableHeight = size.height - insets.top - insets.bottom;
+                    // 获取行高
+                    int lineHeight = logTextArea.getFontMetrics(logTextArea.getFont()).getHeight();
+                    // 计算行数，留出一些空间用于边距
+                    int lines = (availableHeight - 10) / lineHeight;
+                    // 设置 JTextArea 的行数
+                    logTextArea.setRows(lines);
+                }
+            });
 
             add(horizontalBox, BorderLayout.CENTER);
         }
