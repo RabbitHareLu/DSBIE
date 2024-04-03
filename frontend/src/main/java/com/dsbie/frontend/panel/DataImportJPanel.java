@@ -1,26 +1,39 @@
 package com.dsbie.frontend.panel;
 
+import com.dsbie.frontend.Main;
 import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.component.LeftTreeNode;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
-import com.dsbie.frontend.utils.CompletableFutureUtil;
-import com.dsbie.frontend.utils.ImageLoadUtil;
-import com.dsbie.frontend.utils.TabbedPaneUtil;
+import com.dsbie.frontend.utils.*;
 import com.dsbie.rearend.KToolsContext;
 import com.dsbie.rearend.api.DataSourceApi;
 import com.dsbie.rearend.common.model.Pair;
+import com.dsbie.rearend.common.utils.StringUtil;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
+import com.formdev.flatlaf.FlatClientProperties;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.Serial;
 import java.util.Map;
 import java.util.Objects;
@@ -54,23 +67,16 @@ public class DataImportJPanel extends JPanel {
      */
     private JComboBox<String> importTypeComboBox;
     /**
-     * 文件路径和sql输入框
+     * sql输入框
      */
-    private JTextArea filePathSqlTextArea;
+    private JTextArea sqlTextArea;
+    private JTextField filePathField;
     private JTextArea logTextArea;
 
     /**
      * 来源数据源
      */
     private JComboBox<String> sourceConnectionComboBox;
-    /**
-     * 来源schema
-     */
-    private JComboBox<String> sourceSchemaComboBox;
-    /**
-     * 来源表
-     */
-    private JComboBox<String> sourceTableComboBox;
 
     private JTabbedPane tabbedPane;
     private RegularJPanel regularJPanel;
@@ -230,6 +236,7 @@ public class DataImportJPanel extends JPanel {
             verticalBox.add(importTypeBox);
             verticalBox.add(Box.createVerticalStrut(30));
 
+
             if (Objects.equals(treeEntity.getNodeType(), LeftTreeNodeType.CONNECTION)) {
                 for (int i = 0; i < currentTreeNode.getChildCount(); i++) {
                     String schemaStr = (String) ((LeftTreeNode) currentTreeNode.getChildAt(i)).getUserObject();
@@ -261,25 +268,67 @@ public class DataImportJPanel extends JPanel {
                 schemaComboBox.setSelectedItem(schemaTreeNode.getUserObject());
                 tableComboBox.setSelectedItem(currentTreeNode.getUserObject());
             }
+
             connectionComboBox.setSelectedItem(pair.getKey());
+
             add(verticalBox, BorderLayout.NORTH);
+
+            Box filePathBox = Box.createHorizontalBox();
+            JLabel filePathLabel = new JLabel("路径: ");
+            filePathBox.add(filePathLabel);
+            filePathBox.add(Box.createHorizontalStrut(30));
+            filePathLabel.setPreferredSize(dimension);
+
+            JButton chooseFileButton = initChooseFileButton();
+            filePathField = new JTextField();
+            filePathField.setDragEnabled(true);
+            filePathField.setDropTarget(new DropTarget(filePathField, new DropTargetAdapter() {
+                @Override
+                public void drop(DropTargetDropEvent dtde) {
+                    try {
+                        dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                        Transferable transferable = dtde.getTransferable();
+                        if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                            String transferData = transferable.getTransferData(DataFlavor.javaFileListFlavor).toString();
+                            String replace = transferData.replace("[", "").replace("]", "");
+                            if (StringUtil.isNotBlank(replace)) {
+                                File file = new File(replace);
+                                if (file.isFile()) {
+                                    SwingUtilities.invokeLater(() -> filePathField.setText(replace));
+                                } else {
+                                    DialogUtil.showErrorDialog(Main.dsbieJFrame, replace + " 不是单个文件");
+                                    LogTextAreaUtil.appendLog(logTextArea, replace + " 不是单个文件");
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                        throw new RuntimeException("拖拽赋值文件绝对路径异常");
+                    }
+                }
+            }));
+
+            filePathField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, chooseFileButton);
+            filePathBox.add(filePathField);
+            verticalBox.add(filePathBox);
+
+            JLabel sqlLabel = new JLabel("SQL: ");
+            sqlLabel.setPreferredSize(dimension);
+            sqlTextArea = new JTextArea();
+            sqlTextArea.setColumns(10);
+            JScrollPane jScrollPane = new JScrollPane();
+            jScrollPane.setViewportView(sqlTextArea);
 
             Box centerVertical = Box.createVerticalBox();
 
-            Box filePathSqlBox = Box.createHorizontalBox();
-            JLabel filePathSqlLabel = new JLabel("输入框: ");
-            filePathSqlBox.add(filePathSqlLabel);
-            filePathSqlBox.add(Box.createHorizontalStrut(30));
-            filePathSqlLabel.setPreferredSize(dimension);
+            Box sourceConnectionBox = Box.createHorizontalBox();
+            JLabel sourceConnectionLabel = new JLabel("数据源:");
+            sourceConnectionBox.add(sourceConnectionLabel);
+            sourceConnectionBox.add(Box.createHorizontalStrut(30));
+            sourceConnectionLabel.setPreferredSize(dimension);
 
-            filePathSqlTextArea = new JTextArea();
-            filePathSqlTextArea.setRows(10);
-            filePathSqlTextArea.setColumns(10);
-            JScrollPane jScrollPane = new JScrollPane();
-            jScrollPane.setViewportView(filePathSqlTextArea);
-            filePathSqlBox.add(jScrollPane);
-            centerVertical.add(filePathSqlBox);
-
+            sourceConnectionComboBox = new JComboBox<>(connectionVector);
+            sourceConnectionBox.add(sourceConnectionComboBox);
             importTypeComboBox.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -287,48 +336,45 @@ public class DataImportJPanel extends JPanel {
                         String newImportType = importTypeComboBox.getItemAt(importTypeComboBox.getSelectedIndex());
                         if (!Objects.equals(newImportType, oldImportType)) {
                             if (Objects.equals(newImportType, "SQL")) {
-                                Box sourceConnectionBox = Box.createHorizontalBox();
-                                JLabel connectionLabel = new JLabel("数据源:");
-                                sourceConnectionBox.add(connectionLabel);
-                                sourceConnectionBox.add(Box.createHorizontalStrut(30));
-                                connectionLabel.setPreferredSize(dimension);
-
-                                sourceConnectionComboBox = new JComboBox<>();
-                                sourceConnectionBox.add(sourceConnectionComboBox);
-
-                                Box sourceSchemaTableBox = Box.createHorizontalBox();
-                                JLabel schemaLabel = new JLabel("Schema: ");
-                                sourceSchemaTableBox.add(schemaLabel);
-                                sourceSchemaTableBox.add(Box.createHorizontalStrut(30));
-                                schemaLabel.setPreferredSize(dimension);
-
-                                Vector<String> schemaVector = new Vector<>();
-                                Vector<String> tableVector = new Vector<>();
-
-                                sourceSchemaComboBox = new JComboBox<>(schemaVector);
-                                sourceSchemaTableBox.add(sourceSchemaComboBox);
-                                sourceSchemaTableBox.add(Box.createHorizontalStrut(50));
-
-                                JLabel sourceTableLabel = new JLabel("表名:");
-                                sourceSchemaTableBox.add(sourceTableLabel);
-                                sourceSchemaTableBox.add(Box.createHorizontalStrut(30));
-
-                                sourceTableComboBox = new JComboBox<>(tableVector);
-                                sourceSchemaTableBox.add(sourceTableComboBox);
-
                                 SwingUtilities.invokeLater(() -> {
+                                    // 删除路径box
+                                    verticalBox.remove(verticalBox.getComponentCount() - 1);
+                                    // 将数据源box添加到verticalBox的底部
                                     verticalBox.add(sourceConnectionBox, -1);
+                                    // verticalBox的底部再添加一个30 空白行
                                     verticalBox.add(Box.createVerticalStrut(30), -1);
-                                    verticalBox.add(sourceSchemaTableBox, -1);
-                                    verticalBox.add(Box.createVerticalStrut(30), -1);
+
+                                    // 复用filePathBox, 删除filePathBox中的路径输入框
+                                    // 删除filePathBox中的空白列
+                                    // 删除filePathBox中的路径label
+                                    filePathBox.removeAll();
+
+                                    // filePathBox添加SQL Label
+                                    filePathBox.add(sqlLabel);
+                                    // filePathBox添加空白列
+                                    filePathBox.add(Box.createHorizontalStrut(30));
+                                    // filePathBox添加jScrollPane-sqlTextArea
+                                    filePathBox.add(jScrollPane);
+                                    // filePathBox添加到centerVertical中
+                                    centerVertical.add(filePathBox);
                                     add(centerVertical, BorderLayout.CENTER);
                                     centerVertical.revalidate();
                                 });
                             } else if (Objects.equals(oldImportType, "SQL")) {
                                 SwingUtilities.invokeLater(() -> {
-                                    for (int i = 0; i < 4; i++) {
-                                        verticalBox.remove(verticalBox.getComponentCount() - 1);
-                                    }
+                                    // 清空centerVertical
+                                    centerVertical.removeAll();
+                                    // 删除verticalBox的空白行
+                                    verticalBox.remove(verticalBox.getComponentCount() - 1);
+                                    // 删除verticalBox的数据源box
+                                    verticalBox.remove(verticalBox.getComponentCount() - 1);
+
+                                    filePathBox.removeAll();
+                                    filePathBox.add(filePathLabel);
+                                    filePathBox.add(Box.createHorizontalStrut(30));
+                                    filePathBox.add(filePathField);
+                                    verticalBox.add(filePathBox);
+
                                     centerVertical.revalidate();
                                 });
                             }
@@ -339,6 +385,43 @@ public class DataImportJPanel extends JPanel {
             });
 
             add(centerVertical, BorderLayout.CENTER);
+        }
+
+        private JButton initChooseFileButton() {
+            JButton chooseFileButton = new JButton(ImageLoadUtil.getInstance().getChooseFileIcon());
+            chooseFileButton.addActionListener(e -> {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                fileChooser.setMultiSelectionEnabled(false);
+                fileChooser.setCurrentDirectory(FileSystemView.getFileSystemView().getHomeDirectory());
+                fileChooser.addChoosableFileFilter(new FileFilter() {
+                    @Override
+                    public boolean accept(File f) {
+                        if (Objects.equals(String.valueOf(importTypeComboBox.getSelectedItem()).toUpperCase(), "CSV")) {
+                            return f.getName().toLowerCase().endsWith(".csv");
+                        } else if (Objects.equals(String.valueOf(importTypeComboBox.getSelectedItem()).toUpperCase(), "EXCEL")) {
+                            return f.getName().toLowerCase().endsWith(".xlsx") || f.getName().toLowerCase().endsWith(".xls");
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        if (Objects.equals(String.valueOf(importTypeComboBox.getSelectedItem()).toUpperCase(), "CSV")) {
+                            return "CSV文件(*.csv)";
+                        } else if (Objects.equals(String.valueOf(importTypeComboBox.getSelectedItem()).toUpperCase(), "EXCEL")) {
+                            return "Excel文件(*.xlsx, *.xls)";
+                        }
+                        return null;
+                    }
+                });
+                int result = fileChooser.showOpenDialog(null);
+                if (Objects.equals(result, JFileChooser.APPROVE_OPTION)) {
+                    filePathField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                }
+
+            });
+            return chooseFileButton;
         }
 
     }
@@ -458,24 +541,6 @@ public class DataImportJPanel extends JPanel {
 
             toolBar.add(Box.createVerticalGlue());
             horizontalBox.add(toolBar);
-
-            addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    // 获取 Panel 的可用大小
-                    Dimension size = getSize();
-                    // 获取 Panel 内部的 Insets（边距）
-                    Insets insets = getInsets();
-                    // 计算可用空间，减去边距
-                    int availableHeight = size.height - insets.top - insets.bottom;
-                    // 获取行高
-                    int lineHeight = logTextArea.getFontMetrics(logTextArea.getFont()).getHeight();
-                    // 计算行数，留出一些空间用于边距
-                    int lines = (availableHeight - 10) / lineHeight;
-                    // 设置 JTextArea 的行数
-                    logTextArea.setRows(lines);
-                }
-            });
 
             add(horizontalBox, BorderLayout.CENTER);
         }
