@@ -1,7 +1,7 @@
 package com.dsbie.rearend.mybatis;
 
 import com.dsbie.rearend.common.utils.DataSourceUtil;
-import com.dsbie.rearend.manager.datasource.jdbc.JdbcConfig;
+import com.dsbie.rearend.manager.datasource.type.jdbc.JdbcConfig;
 import org.flywaydb.core.Flyway;
 
 import javax.sql.DataSource;

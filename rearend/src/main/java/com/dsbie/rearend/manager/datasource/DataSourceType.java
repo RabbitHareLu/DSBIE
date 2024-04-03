@@ -1,6 +1,7 @@
 package com.dsbie.rearend.manager.datasource;
 
-import com.dsbie.rearend.manager.datasource.jdbc.JdbcType;
+import com.dsbie.rearend.manager.datasource.type.file.FileType;
+import com.dsbie.rearend.manager.datasource.type.jdbc.JdbcType;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
 import lombok.Getter;
 
@@ -18,7 +19,9 @@ import java.util.stream.Collectors;
 @Getter
 public enum DataSourceType {
 
-    JDBC(JdbcType.values());
+    JDBC(JdbcType.values()),
+
+    FILE(FileType.values());
 
     private final List<Type> supportedTypes;
 

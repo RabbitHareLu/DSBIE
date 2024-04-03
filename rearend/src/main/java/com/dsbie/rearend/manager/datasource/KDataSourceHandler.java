@@ -1,8 +1,12 @@
 package com.dsbie.rearend.manager.datasource;
 
-import com.dsbie.rearend.manager.datasource.jdbc.model.TableMetadata;
+import com.dsbie.rearend.job.element.BaseRow;
+import com.dsbie.rearend.job.model.JobModel;
+import com.dsbie.rearend.manager.datasource.type.jdbc.model.TableMetadata;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * 数据源接口
@@ -47,5 +51,14 @@ public interface KDataSourceHandler {
      * 查询表元数据
      */
     TableMetadata selectTableMetadata(String schema, String tableName);
+    
+    /**
+     * 查询数据
+     */
+    void selectData(JobModel jobModel, Consumer<Stream<BaseRow>> consumer);
 
+    /**
+     * 同步数据
+     */
+    void syncData(JobModel jobModel, Stream<BaseRow> baseRow);
 }

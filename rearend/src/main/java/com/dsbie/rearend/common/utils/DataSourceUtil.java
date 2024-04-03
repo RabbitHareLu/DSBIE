@@ -1,6 +1,6 @@
 package com.dsbie.rearend.common.utils;
 
-import com.dsbie.rearend.manager.datasource.jdbc.JdbcConfig;
+import com.dsbie.rearend.manager.datasource.type.jdbc.JdbcConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;

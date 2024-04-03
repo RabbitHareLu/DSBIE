@@ -1,10 +1,11 @@
-package com.dsbie.rearend.manager.datasource.jdbc.adaper.mysql;
+package com.dsbie.rearend.manager.datasource.type.jdbc.adaper.mysql;
 
 import com.dsbie.rearend.common.utils.StreamUtil;
 import com.dsbie.rearend.exception.KToolException;
-import com.dsbie.rearend.manager.datasource.jdbc.AbstractJdbcHandler;
-import com.dsbie.rearend.manager.datasource.jdbc.model.TableColumn;
-import com.dsbie.rearend.manager.datasource.jdbc.model.TableMetadata;
+import com.dsbie.rearend.job.element.DataType;
+import com.dsbie.rearend.manager.datasource.type.jdbc.AbstractJdbcHandler;
+import com.dsbie.rearend.manager.datasource.type.jdbc.model.TableColumn;
+import com.dsbie.rearend.manager.datasource.type.jdbc.model.TableMetadata;
 import com.mysql.cj.MysqlType;
 import com.mysql.cj.jdbc.Driver;
 
@@ -99,6 +100,23 @@ public class MysqlHandler extends AbstractJdbcHandler {
     @Override
     protected SQLType getSqlTypeByJdbcType(String typeName) {
         return MysqlType.getByName(typeName);
+    }
+
+    @Override
+    protected DataType getDataTypeByJdbcType(String typeName) {
+        MysqlType mysqlType = MysqlType.getByName(typeName);
+        return switch (mysqlType) {
+            case BINARY -> DataType.BINARY;
+            case FLOAT -> DataType.FLOAT;
+            case DOUBLE -> DataType.DOUBLE;
+            case TIMESTAMP -> DataType.TIMESTAMP;
+            case DECIMAL -> DataType.DECIMAL;
+            case INT, BIGINT, SMALLINT, TINYINT -> DataType.INT;
+            case DATE -> DataType.DATE;
+            case BOOLEAN -> DataType.BOOLEAN;
+            case CHAR, VARCHAR, BLOB, TEXT, LONGBLOB, LONGTEXT, TINYBLOB, TINYTEXT -> DataType.STRING;
+            default -> throw new RuntimeException("暂不支持的数据类型:" + mysqlType.getName());
+        };
     }
 
 }

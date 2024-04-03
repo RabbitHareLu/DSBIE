@@ -2,6 +2,7 @@ package com.dsbie.rearend;
 
 import com.dsbie.rearend.api.DataSourceApi;
 import com.dsbie.rearend.api.SystemApi;
+import com.dsbie.rearend.job.JobContext;
 import com.dsbie.rearend.mybatis.SysDataSource;
 import com.dsbie.rearend.manager.task.TaskManager;
 import com.dsbie.rearend.manager.uid.IdGenerator;
@@ -31,6 +32,8 @@ public class KToolsContext {
 
     private final IdGenerator idGenerator;
 
+    private final JobContext jobContext;
+
     private KToolsContext() {
         // 初始化系统数据源
         DataSource dataSource = SysDataSource.init();
@@ -44,6 +47,8 @@ public class KToolsContext {
         this.taskManager = new TaskManager();
         // 初始化id生成器
         this.idGenerator = new IdGenerator(mybatisContext);
+        // 初始化任务管理器
+        this.jobContext = new JobContext(this.taskManager);
     }
 
     public static KToolsContext getInstance() {

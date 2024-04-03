@@ -4,7 +4,7 @@ import com.dsbie.rearend.api.DataSourceApi;
 import com.dsbie.rearend.manager.datasource.DataSourceFactory;
 import com.dsbie.rearend.manager.datasource.DataSourceType;
 import com.dsbie.rearend.manager.datasource.KDataSourceHandler;
-import com.dsbie.rearend.manager.datasource.jdbc.model.TableMetadata;
+import com.dsbie.rearend.manager.datasource.type.jdbc.model.TableMetadata;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 import com.mybatisflex.core.query.QueryChain;

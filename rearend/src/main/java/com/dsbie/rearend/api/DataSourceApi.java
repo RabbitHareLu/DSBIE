@@ -1,6 +1,6 @@
 package com.dsbie.rearend.api;
 
-import com.dsbie.rearend.manager.datasource.jdbc.model.TableMetadata;
+import com.dsbie.rearend.manager.datasource.type.jdbc.model.TableMetadata;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 

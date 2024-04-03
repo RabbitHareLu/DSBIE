@@ -1,14 +1,14 @@
-package com.dsbie.rearend.manager.datasource.jdbc;
+package com.dsbie.rearend.manager.datasource.type.jdbc;
 
 import com.dsbie.rearend.config.ConfigParamUtil;
 import com.dsbie.rearend.exception.KToolException;
 import com.dsbie.rearend.manager.datasource.DataSourceType;
 import com.dsbie.rearend.manager.datasource.KDataSourceHandler;
 import com.dsbie.rearend.manager.datasource.Type;
-import com.dsbie.rearend.manager.datasource.jdbc.adaper.mysql.MysqlConfig;
-import com.dsbie.rearend.manager.datasource.jdbc.adaper.mysql.MysqlHandler;
-import com.dsbie.rearend.manager.datasource.jdbc.adaper.oracle.OracleConfig;
-import com.dsbie.rearend.manager.datasource.jdbc.adaper.oracle.OracleHandler;
+import com.dsbie.rearend.manager.datasource.type.jdbc.adaper.mysql.MysqlConfig;
+import com.dsbie.rearend.manager.datasource.type.jdbc.adaper.mysql.MysqlHandler;
+import com.dsbie.rearend.manager.datasource.type.jdbc.adaper.oracle.OracleConfig;
+import com.dsbie.rearend.manager.datasource.type.jdbc.adaper.oracle.OracleHandler;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceConfig;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
 

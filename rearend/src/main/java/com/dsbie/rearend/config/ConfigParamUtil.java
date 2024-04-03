@@ -1,5 +1,6 @@
 package com.dsbie.rearend.config;
 
+import com.dsbie.rearend.common.Assert;
 import com.dsbie.rearend.exception.KToolException;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceConfig;
 
@@ -49,7 +50,10 @@ public class ConfigParamUtil {
                 if (field.isAnnotationPresent(ConfigParam.class)) {
                     ConfigParam configParam = field.getAnnotation(ConfigParam.class);
                     field.setAccessible(true);
-                    field.set(t, properties.getOrDefault(configParam.key(), null));
+                    if (configParam.must()) {
+                        Assert.notNull(properties.get(configParam.key()), String.format("参数%s未配置！", configParam.name()));
+                    }
+                    field.set(t, properties.getOrDefault(configParam.key(), configParam.defaultValue()));
                     field.setAccessible(false);
                 }
             }

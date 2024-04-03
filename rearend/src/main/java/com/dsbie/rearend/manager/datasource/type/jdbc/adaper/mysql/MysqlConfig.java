@@ -1,6 +1,6 @@
-package com.dsbie.rearend.manager.datasource.jdbc.adaper.mysql;
+package com.dsbie.rearend.manager.datasource.type.jdbc.adaper.mysql;
 
-import com.dsbie.rearend.manager.datasource.jdbc.JdbcConfig;
+import com.dsbie.rearend.manager.datasource.type.jdbc.JdbcConfig;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
