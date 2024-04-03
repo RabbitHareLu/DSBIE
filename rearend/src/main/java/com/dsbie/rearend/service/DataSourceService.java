@@ -6,11 +6,13 @@ import com.dsbie.rearend.manager.datasource.DataSourceType;
 import com.dsbie.rearend.manager.datasource.KDataSourceHandler;
 import com.dsbie.rearend.manager.datasource.jdbc.model.TableMetadata;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
+import com.dsbie.rearend.mybatis.entity.TreeEntity;
+import com.mybatisflex.core.query.QueryChain;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author WCG
@@ -82,6 +84,35 @@ public class DataSourceService extends BaseService implements DataSourceApi {
             return dataSourceHandler.selectTableMetadata(schema, tableName);
         }
         return null;
+    }
+
+    @Override
+    public Map<String, TreeEntity> selectAllDataSource() {
+        List<TreeEntity> treeEntities = QueryChain.of(TreeEntity.class)
+                .eq(TreeEntity::getNodeType, "CONNECTION")
+                .list();
+
+        Set<String> idList = treeEntities.stream()
+                .flatMap((Function<TreeEntity, Stream<String>>) treeEntity -> Arrays.stream(treeEntity.getNodePath().split("/")))
+                .collect(Collectors.toSet());
+
+        Map<Integer, String> pathNodeMap = QueryChain.of(TreeEntity.class)
+                .select(TreeEntity::getId, TreeEntity::getNodeName)
+                .in(TreeEntity::getId, idList)
+                .list()
+                .stream()
+                .collect(Collectors.toMap(TreeEntity::getId, TreeEntity::getNodeName));
+
+        return treeEntities.stream().collect(Collectors.toMap(treeEntity -> {
+            String[] pathNode = treeEntity.getNodePath().split("/");
+            StringJoiner joiner = new StringJoiner("/");
+            for (int i = 1; i < pathNode.length; i++) {
+                joiner.add(pathNodeMap.get(Integer.valueOf(pathNode[i])));
+            }
+            return joiner.toString().concat("/").concat(treeEntity.getNodeName());
+        }, Function.identity()));
+
+
     }
 
 }

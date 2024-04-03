@@ -2,6 +2,7 @@ package com.dsbie.rearend.api;
 
 import com.dsbie.rearend.manager.datasource.jdbc.model.TableMetadata;
 import com.dsbie.rearend.manager.datasource.model.KDataSourceMetadata;
+import com.dsbie.rearend.mybatis.entity.TreeEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -56,5 +57,11 @@ public interface DataSourceApi {
      * 查询表元数据
      */
     TableMetadata selectTableMetadata(String id, String schema, String tableName);
+
+    /**
+     * 查询所有数据源
+     */
+    Map<String, TreeEntity> selectAllDataSource();
+
 
 }
