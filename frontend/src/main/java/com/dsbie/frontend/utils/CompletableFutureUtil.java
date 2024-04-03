@@ -23,6 +23,7 @@ public class CompletableFutureUtil {
                         if (!(rootCause instanceof KToolException)) {
                             DialogUtil.showErrorDialog(Main.dsbieJFrame, "系统异常");
                         } else {
+                            // 如果是KToolException则会弹框将具体异常信息显示
                             DialogUtil.showErrorDialog(Main.dsbieJFrame, rootCause.getMessage());
                         }
                         log.error(rootCause.getMessage(), rootCause);

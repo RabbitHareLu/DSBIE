@@ -1,7 +1,7 @@
 package com.dsbie.frontend.utils;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import lombok.Data;
+import lombok.Getter;
 
 import javax.swing.*;
 
@@ -10,7 +10,7 @@ import javax.swing.*;
  * @version 1.0
  * @date 2024年03月27日 15:39
  */
-@Data
+@Getter
 public class ImageLoadUtil {
 
     private static final ImageLoadUtil INSTANCE = new ImageLoadUtil();

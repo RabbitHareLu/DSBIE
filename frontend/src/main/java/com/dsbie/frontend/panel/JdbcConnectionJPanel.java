@@ -156,7 +156,11 @@ public class JdbcConnectionJPanel extends JPanel {
         JButton testButton = new JButton("测试连接");
         testButton.addActionListener(e -> CompletableFutureUtil.submit(() -> {
             Map<String, String> nodeInfo = getNodeInfo();
-            KToolsContext.getInstance().getApi(DataSourceApi.class).testDataSource(nodeInfo.get("dbType"), nodeInfo);
+            try {
+                KToolsContext.getInstance().getApi(DataSourceApi.class).testDataSource(nodeInfo.get("dbType"), nodeInfo);
+            } catch (Exception ex) {
+                throw new KToolException(ex.getMessage());
+            }
             SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Main.dsbieJFrame,
                     new Object[]{"数据源连接测试成功！"},
                     "测试连接", JOptionPane.PLAIN_MESSAGE));

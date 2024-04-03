@@ -59,6 +59,19 @@ public class DataImportJPanel extends JPanel {
     private JTextArea filePathSqlTextArea;
     private JTextArea logTextArea;
 
+    /**
+     * 来源数据源
+     */
+    private JComboBox<String> sourceConnectionComboBox;
+    /**
+     * 来源schema
+     */
+    private JComboBox<String> sourceSchemaComboBox;
+    /**
+     * 来源表
+     */
+    private JComboBox<String> sourceTableComboBox;
+
     private JTabbedPane tabbedPane;
     private RegularJPanel regularJPanel;
     private AdvancedJPanel advancedJPanel;
@@ -69,6 +82,11 @@ public class DataImportJPanel extends JPanel {
 
     private LeftTreeNode currentTreeNode;
     private TreeEntity treeEntity;
+
+    /**
+     * importTypeComboBox旧值, 用于对比新值
+     */
+    private String oldImportType = "CSV";
 
     public DataImportJPanel(LeftTreeNode currentTreeNode) {
         this.currentTreeNode = currentTreeNode;
@@ -245,6 +263,8 @@ public class DataImportJPanel extends JPanel {
             connectionComboBox.setSelectedItem(pair.getKey());
             add(verticalBox, BorderLayout.NORTH);
 
+            Box centerVertical = Box.createVerticalBox();
+
             Box filePathSqlBox = Box.createHorizontalBox();
             JLabel filePathSqlLabel = new JLabel("输入框: ");
             filePathSqlBox.add(filePathSqlLabel);
@@ -257,7 +277,68 @@ public class DataImportJPanel extends JPanel {
             JScrollPane jScrollPane = new JScrollPane();
             jScrollPane.setViewportView(filePathSqlTextArea);
             filePathSqlBox.add(jScrollPane);
-            add(filePathSqlBox, BorderLayout.CENTER);
+            centerVertical.add(filePathSqlBox);
+
+            importTypeComboBox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    CompletableFutureUtil.submit(() -> {
+                        String newImportType = importTypeComboBox.getItemAt(importTypeComboBox.getSelectedIndex());
+                        if (!Objects.equals(newImportType, oldImportType)) {
+                            if (Objects.equals(newImportType, "SQL")) {
+                                Box sourceConnectionBox = Box.createHorizontalBox();
+                                JLabel connectionLabel = new JLabel("数据源:");
+                                sourceConnectionBox.add(connectionLabel);
+                                sourceConnectionBox.add(Box.createHorizontalStrut(30));
+                                connectionLabel.setPreferredSize(dimension);
+
+                                sourceConnectionComboBox = new JComboBox<>();
+                                sourceConnectionBox.add(sourceConnectionComboBox);
+
+                                Box sourceSchemaTableBox = Box.createHorizontalBox();
+                                JLabel schemaLabel = new JLabel("Schema: ");
+                                sourceSchemaTableBox.add(schemaLabel);
+                                sourceSchemaTableBox.add(Box.createHorizontalStrut(30));
+                                schemaLabel.setPreferredSize(dimension);
+
+                                Vector<String> schemaVector = new Vector<>();
+                                Vector<String> tableVector = new Vector<>();
+
+                                sourceSchemaComboBox = new JComboBox<>(schemaVector);
+                                sourceSchemaTableBox.add(sourceSchemaComboBox);
+                                sourceSchemaTableBox.add(Box.createHorizontalStrut(50));
+
+                                JLabel sourceTableLabel = new JLabel("表名:");
+                                sourceSchemaTableBox.add(sourceTableLabel);
+                                sourceSchemaTableBox.add(Box.createHorizontalStrut(30));
+
+                                sourceTableComboBox = new JComboBox<>(tableVector);
+                                sourceSchemaTableBox.add(sourceTableComboBox);
+
+                                SwingUtilities.invokeLater(() -> {
+                                    centerVertical.add(sourceConnectionBox, 0);
+                                    centerVertical.add(Box.createVerticalStrut(30), 1);
+                                    centerVertical.add(sourceSchemaTableBox, 2);
+                                    centerVertical.add(Box.createVerticalStrut(30), 3);
+                                    verticalBox.add(centerVertical);
+                                    centerVertical.revalidate();
+                                });
+                            } else if (Objects.equals(oldImportType, "SQL")) {
+                                SwingUtilities.invokeLater(() -> {
+                                    int componentCount = centerVertical.getComponentCount();
+                                    for (int i = 0; i < componentCount - 1; i++) {
+                                        centerVertical.remove(0);
+                                    }
+                                    centerVertical.revalidate();
+                                });
+                            }
+                            oldImportType = newImportType;
+                        }
+                    });
+                }
+            });
+
+            add(centerVertical, BorderLayout.CENTER);
         }
 
     }
@@ -371,23 +452,6 @@ public class DataImportJPanel extends JPanel {
             lineWrapButton.setIcon(ImageLoadUtil.getInstance().getLineWrapIcon());
             lineWrapButton.addActionListener(e -> logTextArea.setLineWrap(!logTextArea.getLineWrap()));
             toolBar.add(lineWrapButton);
-
-            /*JToggleButton latestButton = new JToggleButton();
-            latestButton.setIcon(ImageLoadUtil.getInstance().getLatestIcon());
-            logJScrollPane.setAutoscrolls(false);
-            latestButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    log.info("{}", logJScrollPane.getAutoscrolls());
-                    if (logJScrollPane.getAutoscrolls()) {
-                        logJScrollPane.setAutoscrolls(false);
-                    } else {
-                        logJScrollPane.setAutoscrolls(true);
-                    }
-
-                }
-            });
-            toolBar.add(latestButton);*/
 
             JButton clearButton = new JButton();
             clearButton.setIcon(ImageLoadUtil.getInstance().getDeleteIcon());
