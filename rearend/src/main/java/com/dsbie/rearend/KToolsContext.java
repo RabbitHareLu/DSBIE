@@ -1,6 +1,7 @@
 package com.dsbie.rearend;
 
 import com.dsbie.rearend.api.DataSourceApi;
+import com.dsbie.rearend.api.JobApi;
 import com.dsbie.rearend.api.SystemApi;
 import com.dsbie.rearend.job.JobContext;
 import com.dsbie.rearend.mybatis.SysDataSource;
@@ -8,6 +9,7 @@ import com.dsbie.rearend.manager.task.TaskManager;
 import com.dsbie.rearend.manager.uid.IdGenerator;
 import com.dsbie.rearend.mybatis.MybatisContext;
 import com.dsbie.rearend.service.DataSourceService;
+import com.dsbie.rearend.service.JobService;
 import com.dsbie.rearend.service.SystemService;
 import lombok.Getter;
 
@@ -72,6 +74,8 @@ public class KToolsContext {
             return tClass.cast(new SystemService());
         } else if (tClass == DataSourceApi.class){
             return tClass.cast(new DataSourceService());
+        } else if (tClass == JobApi.class){
+            return tClass.cast(new JobService());
         }
         return null;
     }

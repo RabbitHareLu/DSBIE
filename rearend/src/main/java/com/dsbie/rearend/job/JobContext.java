@@ -36,8 +36,8 @@ public class JobContext {
     }
 
     public void log(String jobId, String msg) {
-//        Optional.ofNullable(J_TEXT_AREA_CACHE.get(jobId))
-//                .ifPresent(jTextArea -> jTextArea.append(msg + "\n"));
+        Optional.ofNullable(J_TEXT_AREA_CACHE.get(jobId))
+                .ifPresent(jTextArea -> jTextArea.append(msg + "\n"));
     }
 
     public void stopJob(String jobId) {

@@ -16,6 +16,11 @@ public class JobResult {
     private JobResultState state;
 
     /**
+     * 数据量
+     */
+    private int dataCount;
+
+    /**
      * 任务消息
      */
     private String message;
