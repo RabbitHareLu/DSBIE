@@ -5,11 +5,14 @@ import com.dsbie.frontend.component.LeftTree;
 import com.dsbie.frontend.component.LeftTreeNode;
 import com.dsbie.frontend.constant.LeftTreeNodeType;
 import com.dsbie.frontend.frame.DsbieJFrame;
-import com.dsbie.frontend.utils.*;
+import com.dsbie.frontend.utils.CompletableFutureUtil;
+import com.dsbie.frontend.utils.DialogUtil;
+import com.dsbie.frontend.utils.ImageLoadUtil;
+import com.dsbie.frontend.utils.TabbedPaneUtil;
 import com.dsbie.rearend.KToolsContext;
 import com.dsbie.rearend.api.DataSourceApi;
 import com.dsbie.rearend.common.model.Pair;
-import com.dsbie.rearend.common.utils.StringUtil;
+import com.dsbie.rearend.common.utils.CollectionUtil;
 import com.dsbie.rearend.mybatis.entity.TreeEntity;
 import com.formdev.flatlaf.FlatClientProperties;
 import lombok.Getter;
@@ -35,6 +38,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.Serial;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Vector;
@@ -289,15 +293,13 @@ public class DataImportJPanel extends JPanel {
                         dtde.acceptDrop(DnDConstants.ACTION_COPY);
                         Transferable transferable = dtde.getTransferable();
                         if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                            String transferData = transferable.getTransferData(DataFlavor.javaFileListFlavor).toString();
-                            String replace = transferData.replace("[", "").replace("]", "");
-                            if (StringUtil.isNotBlank(replace)) {
-                                File file = new File(replace);
-                                if (file.isFile()) {
-                                    SwingUtilities.invokeLater(() -> filePathField.setText(replace));
+                            java.util.List<File> filePathList = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                            log.info("{}", filePathList);
+                            if (CollectionUtil.isNotEmpty(filePathList)) {
+                                if (filePathList.size() > 1) {
+                                    DialogUtil.showErrorDialog(Main.dsbieJFrame, "不支持多个文件");
                                 } else {
-                                    DialogUtil.showErrorDialog(Main.dsbieJFrame, replace + " 不是单个文件");
-                                    LogTextAreaUtil.appendLog(logTextArea, replace + " 不是单个文件");
+                                    SwingUtilities.invokeLater(() -> filePathField.setText(filePathList.getFirst().getAbsolutePath()));
                                 }
                             }
                         }
